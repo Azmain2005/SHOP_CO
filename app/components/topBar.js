@@ -1,21 +1,32 @@
-import React from 'react'
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { FiX } from "react-icons/fi";
 
-export default function TopBar() {
+export default function PromoBanner() {
+  const [visible, setVisible] = useState(true);
+
+  if (!visible) return null;
+
   return (
-<div className='bg-white '>
-<div className="flex flex-wrap justify-between w-full container p-2">
-      <div className="flex flex-row justify-center max-sm:yw-full order-1 sm:px-0">
-        <p className="max-sm:text-[13px]">Mail: webzedcontact@gmail.com</p>
-        <p className="ml-3">|</p>
-        <p className="ml-3 max-sm:text-[13px]">Helpline 4534345656</p>
-      </div>
+    <div className="w-full bg-black text-white text-sm px-4 py-[19px]">
+      <div className="container mx-auto flex items-center justify-center relative">
+        {/* Centered Text */}
+        <p className="text-center w-full text-[14px]">
+          Sign up and get 20% off to your first order.{" "}
+          <Link href="/signup" className="underline font-medium">
+            Sign Up Now
+          </Link>
+        </p>
 
-      <div className="flex flex-wrap justify-center order-2 max-sm:w-full">
-        <p className="ml-3 max-sm:text-[13px]">LOGIN</p>
-        <p className="ml-3">|</p>
-        <p className="ml-3 max-sm:text-[13px]">REGISTER</p>
+        {/* Close Button */}
+        <button
+          onClick={() => setVisible(false)}
+          className="absolute right-4 top-1/2 -translate-y-1/2"
+        >
+          <FiX className="text-lg" />
+        </button>
       </div>
     </div>
-</div>
-  )
+  );
 }

@@ -4,15 +4,15 @@ import { Star } from "lucide-react";
 
 export default function Card({ image, title, reviews, rating, price }) {
   return (
-    <div className="flex flex-col justify-between h-full max-w-xs rounded-2xl   p-4 bg-white hover:shadow-lg transition">
+    <div className="p-10 flex flex-col justify-between h-full w-full rounded-2xl m-1 bg-white hover:shadow-lg transition">
       {/* Product Image */}
-      <div className="h-[220px] flex items-center justify-center">
+      <div className="flex items-center justify-center bg-[#F0EEED] w-full aspect-square rounded-3xl overflow-hidden">
         <Image
           src={image}
           alt={title}
-          width={200}
-          height={200}
-          className="object-contain max-h-[200px]"
+          width={300}
+          height={300}
+          className="object-contain w-full h-7/8"
         />
       </div>
 
@@ -34,7 +34,7 @@ export default function Card({ image, title, reviews, rating, price }) {
               }`}
             />
           ))}
-          <span className="ml-2 text-sm text-gray-500">{reviews} Reviews</span>
+          <span className="ml-2 text-sm text-gray-500">{rating}/5</span>
         </div>
 
         {/* Price */}
