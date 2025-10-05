@@ -23,7 +23,7 @@ export default function TestimonialCard({ name, message, rating }) {
       <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
 
       {/* Review Message */}
-      <p className="mt-3 text-gray-700 text-[16px] line-clamp-4">"{message}"</p>
+      <p className="mt-3 text-gray-700 text-[16px] line-clamp-4">{`"${message}"`}</p>
     </div>
   );
 }
