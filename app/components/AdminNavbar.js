@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Menu, X, Globe, MessageSquare, User, LogOut, Bell, MoreVertical, HardDrive } from 'lucide-react'; // Added MoreVertical and HardDrive icons
 import { useRouter } from 'next/navigation';
-
+import Cookies from 'js-cookie';
 
 
 
@@ -16,6 +16,7 @@ export default function AdminNavbar() {
     if (e) e.preventDefault(); // Prevents the "#" from jumping to the top of the page
 
     localStorage.removeItem('auth_token');
+    Cookies.remove('auth_token');
 
     router.push('/account/login');
   };
