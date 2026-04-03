@@ -7,12 +7,11 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Card from "../components/Card";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
-  PaginationItem,
-  PaginationLink,
 } from "@/components/ui/pagination";
 import PromoBanner from "../components/topBar";
 
@@ -47,6 +46,9 @@ export default function Page() {
 
   useEffect(() => {
     setFilteredProducts(productsData?.data || []);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [productsData]);
 
   const handleFilterApply = (newFilters) => {
@@ -56,112 +58,124 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex justify-center items-center">
-        <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      <div className="h-screen w-full flex flex-col justify-center items-center bg-white">
+        <div className="w-12 h-12 border-[1px] border-stone-200 border-t-stone-900 rounded-full animate-spin"></div>
+        <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-stone-400 font-sans">Loading Atelier</p>
       </div>
     );
   }
 
-  if (error) return <div className="p-20 text-center text-red-500">Error loading products. Please try again.</div>;
+  if (error) return (
+    <div className="p-20 text-center font-serif italic text-stone-500">
+      Our apologies, we couldn't load the collection. Please refresh.
+    </div>
+  );
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen font-sans">
       <PromoBanner />
       <Navbar />
 
       <SidebarProvider>
-        <div className="flex flex-col md:flex-row w-full max-w-[1440px] mx-auto">
-          {/* Sidebar - Hidden on mobile, controlled by Trigger */}
+        {/* FIX: The flex container below ensures Sidebar and Main are side-by-side */}
+        <div className="flex w-full max-w-[1440px] mx-auto min-h-screen">
+          
           <AppSidebar
             storedProducts={productsData?.data || []}
             onFilterApply={handleFilterApply}
           />
 
-          <main className="flex-1 w-full px-4 md:px-8 pb-20">
-            {/* Mobile/Desktop Header Section */}
-            <div className="flex items-center justify-between w-full mb-6">
+          {/* FIX: flex-1 allows the main content to fill the remaining horizontal space */}
+          <main className="flex-1 px-6 md:px-12 pb-32 pt-10">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-6 border-b border-stone-100 pb-8">
               <div>
-                <h1 className="text-2xl font-bold text-black uppercase tracking-tighter">All Products</h1>
+                <span className="text-[10px] uppercase tracking-[0.4em] text-[#D4AF37] font-bold mb-2 block">
+                  The Collection
+                </span>
+                <h1 className="text-4xl md:text-5xl font-serif tracking-tight text-stone-900">
+                  All <span className="italic">Creations</span>
+                </h1>
               </div>
 
-              {/* Custom Filter Button */}
+              {/* Minimalist Filter Trigger */}
               <SidebarTrigger asChild>
-                <button className="flex items-center justify-center bg-black hover:bg-gray-800 text-white w-10 h-10 md:w-auto md:px-4 md:py-2 rounded-full transition-all shrink-0">
-                  <SlidersHorizontal size={20} className="text-white" />
-                  <span className="hidden md:inline ml-2 text-sm font-medium text-white">Filters</span>
+                <button className="group flex items-center gap-3 py-2 px-1 transition-all">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-600 group-hover:text-black">
+                    Filter & Sort
+                  </span>
+                  <div className="bg-stone-100 p-2 rounded-full group-hover:bg-stone-900 group-hover:text-white transition-colors">
+                    <SlidersHorizontal size={16} />
+                  </div>
                 </button>
               </SidebarTrigger>
             </div>
-            {/* Product Grid - Optimized for Mobile Image Size */}
+
+            {/* Product Grid */}
             {filteredProducts.length === 0 ? (
-              <div className="flex flex-col justify-center items-center py-32 text-center">
-                <div className="bg-gray-100 p-6 rounded-full mb-4">
-                  <SlidersHorizontal size={40} className="text-gray-400" />
-                </div>
-                <p className="text-gray-900 font-semibold text-lg">No matches found</p>
+              <div className="flex flex-col justify-center items-center py-40 text-center">
+                <p className="font-serif italic text-xl text-stone-400">No pieces found in this selection.</p>
+                <button 
+                  onClick={() => handleFilterApply({brand: "", minPrice: 0, maxPrice: 99000, sort: ""})}
+                  className="mt-4 text-[10px] uppercase tracking-widest border-b border-stone-300 pb-1 hover:border-stone-900 transition-colors"
+                >
+                  Clear Filters
+                </button>
               </div>
             ) : (
-              /* CHANGE: Reduced gap from gap-3 to gap-2 on mobile (xs) 
-                 and removed horizontal padding on the container for mobile.
-              */
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 w-full px-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-16 lg:gap-x-10">
                 {filteredProducts.map((product) => (
-                  <div key={product._id} className="w-full max-w-[180px] mx-auto md:max-w-none">
-                    <Link href={`/ProductDetails/${product._id}`}>
+                  <motion.div 
+                    key={product._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="w-full"
+                  >
+                    <Link href={`/ProductDetails/${product._id}`} className="group">
                       <Card
                         image={product.photos?.[0]}
                         title={product.title}
-                        rating={3}
+                        rating={product.rating || 5}
                         price={product.selling}
                       />
                     </Link>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
 
             {/* Pagination Component */}
             {filteredProducts.length > 0 && (
-              <div className="mt-16 flex justify-center border-t border-gray-100 pt-10">
+              <div className="mt-24 flex justify-center pt-12 border-t border-stone-100">
                 <Pagination>
-                  <PaginationContent className="gap-2">
-                    <PaginationItem>
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="p-2 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50 transition-colors"
-                      >
-                        <ChevronLeft size={20} />
-                      </button>
-                    </PaginationItem>
+                  <PaginationContent className="flex items-center gap-4">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold disabled:opacity-20 hover:text-[#D4AF37] transition-colors"
+                    >
+                      <ChevronLeft size={16} /> Prev
+                    </button>
 
-                    {[...Array(productsData?.totalPages || 1)].map((_, i) => (
-                      <PaginationItem key={i + 1} className="hidden sm:block">
-                        <PaginationLink
-                          className={`cursor-pointer rounded-lg w-10 h-10 flex items-center justify-center transition-all ${currentPage === i + 1
-                            ? "bg-black text-white border-black"
-                            : "border border-gray-200 hover:border-black"
-                            }`}
-                          onClick={() => setCurrentPage(i + 1)}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
+                    <div className="flex items-center gap-2 px-8">
+                       <span className="text-xs font-serif italic text-stone-400">Page</span>
+                       <span className="text-sm font-bold">{currentPage}</span>
+                       <span className="text-xs font-serif italic text-stone-400 mx-1">of</span>
+                       <span className="text-sm font-bold">{productsData?.totalPages || 1}</span>
+                    </div>
 
-                    <PaginationItem>
-                      <button
-                        onClick={() => {
-                          if (currentPage < (productsData?.totalPages || 1)) {
-                            setCurrentPage((p) => p + 1);
-                          }
-                        }}
-                        disabled={currentPage >= (productsData?.totalPages || 1)}
-                        className="p-2 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50 transition-colors"
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                    </PaginationItem>
+                    <button
+                      onClick={() => {
+                        if (currentPage < (productsData?.totalPages || 1)) {
+                          setCurrentPage((p) => p + 1);
+                        }
+                      }}
+                      disabled={currentPage >= (productsData?.totalPages || 1)}
+                      className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold disabled:opacity-20 hover:text-[#D4AF37] transition-colors"
+                    >
+                      Next <ChevronRight size={16} />
+                    </button>
                   </PaginationContent>
                 </Pagination>
               </div>
