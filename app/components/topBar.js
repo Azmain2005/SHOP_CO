@@ -9,20 +9,20 @@ export default function PromoBanner() {
   if (!visible) return null;
 
   return (
-    <div className="w-full bg-black text-white text-sm px-4 py-[19px]">
+    <div className="w-full bg-black text-white text-sm px-4 py-[14px]">
       <div className="container mx-auto flex items-center justify-center relative">
         {/* Centered Text */}
-        <p className="text-center w-full text-[14px]">
-          Sign up and get 20% off to your first order.{" "}
-          <Link href="/signup" className="underline font-medium">
-            Sign Up Now
+        <p className="text-center w-full text-[13px] tracking-wide">
+          ✨ Eid Special — Get 20% off on all Abaya & Kaftan collections.{" "}
+          <Link href="/product" className="underline font-semibold hover:text-gray-300 transition-colors">
+            Shop Now
           </Link>
         </p>
 
         {/* Close Button */}
         <button
           onClick={() => setVisible(false)}
-          className="absolute right-4 top-1/2 -translate-y-1/2"
+          className="absolute right-4 top-1/2 -translate-y-1/2 hover:text-gray-400 transition-colors"
         >
           <FiX className="text-lg" />
         </button>

@@ -5,77 +5,93 @@ import { motion } from "framer-motion";
 
 const CATEGORIES = [
   {
-    id: "men",
-    label: "Men",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-    href: "/product?category=men",
+    id: "abaya",
+    label: "Abaya",
+    img: "https://i.ibb.co.com/mC7hXR4C/abdul-raheem-kannath-CWD8-UDt3y-PI-unsplash.jpg",
+    href: "/product?category=abaya",
+    description: "Modern Silhouettes"
   },
   {
-    id: "women",
-    label: "Women",
-    img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-    href: "/product?category=women",
+    id: "kaftan",
+    label: "Kaftan",
+    img: "https://i.ibb.co.com/ymdYSwVq/image.png",
+    href: "/product?category=kaftan",
+    description: "Flowing Elegance"
   },
   {
-    id: "boys",
-    label: "Boys",
-    img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
-    href: "/product?category=boys",
+    id: "borka",
+    label: "Borka",
+    img: "https://i.ibb.co.com/NdtRb9GD/modern-stylish-muslim-woman-hijab-city-street.jpg",
+    href: "/product?category=borka",
+    description: "Classic Modesty"
   },
   {
-    id: "girls",
-    label: "Girls",
-    img: "https://images.unsplash.com/photo-1535572290543-960a8046f5af?w=400&q=80",
-    href: "/product?category=girls",
-  },
-  {
-    id: "panjabi",
-    label: "Panjabi",
-    img: "https://images.unsplash.com/photo-1574180566232-aaad1b5b8450?w=400&q=80",
-    href: "/product?category=panjabi",
-  },
-  {
-    id: "saree",
-    label: "Saree",
-    img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&q=80",
-    href: "/product?category=saree",
+    id: "hijab",
+    label: "Hijab",
+    img: "https://i.ibb.co.com/27Mm3Y7Y/muhammad-faiz-zulkeflee-Kr-R7x-En4-HV8-unsplash.jpg",
+    href: "/product?category=hijab",
+    description: "Signature Silk"
   },
 ];
 
 export default function TrendingCategories() {
   return (
-    <section className="py-10 px-4 max-w-[1440px] mx-auto">
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="text-center text-xl md:text-2xl font-bold tracking-widest text-gray-800 mb-8 uppercase"
-      >
-        Trending Categories
-      </motion.h2>
+    <section className="py-20 px-6 bg-white max-w-[1440px] mx-auto">
+      {/* Section Header */}
+      <div className="flex flex-col items-center mb-16">
+        <motion.span 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          className="text-[10px] tracking-[0.4em] uppercase text-[#D4AF37] font-bold mb-3"
+        >
+          Curated Essentials
+        </motion.span>
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-3xl md:text-4xl font-serif text-stone-900 text-center tracking-tight"
+        >
+          Explore <span className="italic">Collections</span>
+        </motion.h2>
+        <div className="w-12 h-[1px] bg-stone-200 mt-6" />
+      </div>
 
-      <div className="flex gap-4 md:gap-6 justify-center flex-wrap">
+      {/* Grid Layout - Responsive 1 to 4 columns */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
         {CATEGORIES.map((cat, i) => (
           <motion.div
             key={cat.id}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
+            transition={{ duration: 0.8, delay: i * 0.1, ease: [0.21, 1.11, 0.81, 0.99] }}
           >
-            <Link href={cat.href} className="group flex flex-col items-center gap-2">
-              <div className="relative w-[100px] h-[120px] md:w-[130px] md:h-[155px] lg:w-[160px] lg:h-[190px] rounded-2xl overflow-hidden shadow-md border border-gray-100">
+            <Link href={cat.href} className="group relative block overflow-hidden bg-stone-100">
+              {/* Image Container with 4:5 Aspect Ratio */}
+              <div className="relative aspect-[4/5] overflow-hidden">
                 <img
                   src={cat.img}
                   alt={cat.label}
-                  className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                
+                {/* Minimal Overlay */}
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-500" />
+                
+                {/* Bottom Text Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                  <p className="text-[10px] text-white/80 uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    {cat.description}
+                  </p>
+                  <h3 className="text-white text-xl md:text-2xl font-serif tracking-wide">
+                    {cat.label}
+                  </h3>
+                </div>
               </div>
-              <span className="text-xs md:text-sm font-semibold text-gray-700 group-hover:text-black transition-colors tracking-wide">
-                {cat.label}
-              </span>
+
+              {/* Reveal Line on Hover */}
+              <div className="absolute bottom-0 left-0 w-0 h-1 bg-[#D4AF37] group-hover:w-full transition-all duration-700" />
             </Link>
           </motion.div>
         ))}

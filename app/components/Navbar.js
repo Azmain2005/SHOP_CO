@@ -1,113 +1,155 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-// Using icons from a single, standard package (like lucide-react or feather) usually looks cleaner,
-// but sticking with react-icons as requested.
-import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiShoppingCart, FiUser, FiChevronDown, FiX, FiMenu } from "react-icons/fi";
+
+const ABAYA_SUBMENU = [
+  { label: "Short Abaya", href: "/product?category=short-abaya" },
+  { label: "ABCD Abaya", href: "/product?category=abcd-abaya" },
+  { label: "Stone Abaya", href: "/product?category=stone-abaya" },
+  { label: "View All Abayas", href: "/product?category=abaya" },
+];
+
+const NAV_LINKS = [
+  { label: "Collections", href: "/product" },
+  { label: "Abaya", href: "#", hasDropdown: true },
+  { label: "Kaftan", href: "/product?category=kaftan" },
+  { label: "Borka", href: "/product?category=borka" },
+];
 
 export default function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isAbayaOpen, setIsAbayaOpen] = useState(false);
 
   return (
-    // Increased max-width for a more expansive feel, added a subtle border for separation.
-    <nav className="max-w-[1500px] mx-auto bg-white border-b border-gray-100/70 py-[1px]">
-      <div className="px-6 lg:px-12 flex items-center justify-between py-4 md:py-5">
-        
-        {/* Left: Mobile Menu Button */}
-        <div className="flex items-center md:hidden">
-          <button
-            className="text-3xl text-gray-800 hover:text-black transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <FiX /> : <FiMenu />}
-          </button>
-        </div>
-
-        {/* Center: Logo - Cooler Font and Color */}
-        <Link
-          href="/"
-          // Bolder, slightly more stylized font size for a statement logo.
-          className="lg:text-[48px] max-sm:text-[34px] font-black tracking-tight text-gray-900 mx-auto md:mx-0"
-        >
-          <span className="text-black">SHOP</span>.<span className="text-gray-600">CO</span>
-        </Link>
-
-        {/* Desktop Menu - Tighter Spacing, Bolder Text */}
-        <div className="hidden md:flex items-center space-x-8 ml-8">
-          {/* Enhanced Shop Link with dropdown indicator */}
-          <Link href="/product" className="group flex items-center text-sm font-semibold uppercase tracking-wider text-gray-700 hover:text-black transition-colors relative">
-            Shop 
-            <span className="ml-1 text-xs group-hover:text-gray-600 transition-colors">▼</span>
-            {/* Subtle underline hover effect */}
-            <span className="absolute bottom-0 left-0 w-full h-[2px] bg-gray-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
-          </Link>
-          <Link href="/sale" className="text-sm font-semibold uppercase tracking-wider text-gray-700 hover:text-black transition-colors">
-            On Sale
-          </Link>
-          <Link href="/new-arrivals" className="text-sm font-semibold uppercase tracking-wider text-gray-700 hover:text-black transition-colors">
-            New Arrivals
-          </Link>
-          <Link href="/brands" className="text-sm font-semibold uppercase tracking-wider text-gray-700 hover:text-black transition-colors">
-            Brands
-          </Link>
-        </div>
-
-        {/* Desktop Search Bar - Sleeker Design */}
-        {/* Removed fixed 'w-[1077px]' and kept 'max-w-xl' for better flexibility */}
-        <div className="hidden md:flex flex-1 mx-8 max-w-lg lg:max-w-xl">
-          <div className="flex w-full items-center rounded-full bg-gray-50 border border-gray-200 px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-gray-300 transition-all">
-            <FiSearch className="text-gray-500 text-lg" />
-            <input
-              type="text"
-              placeholder="Search for products, brands, and more..."
-              className="ml-3 flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder-gray-400"
-            />
-          </div>
-        </div>
-
-        {/* Right: Icons - Bigger and Bolder */}
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <FiSearch className="text-2xl text-gray-800 cursor-pointer hover:text-black md:hidden transition-colors" />
+    <>
+      <nav className="w-full bg-white/90 backdrop-blur-md border-b border-stone-100 sticky top-0 z-[100] h-20">
+        <div className="max-w-[1440px] mx-auto h-full px-6 flex items-center justify-between">
           
-          <Link href="/cart" className="relative group">
-             {/* Slightly larger, use a group hover for effect */}
-            <FiShoppingCart className="text-2xl text-gray-800 cursor-pointer group-hover:text-gray-600 transition-colors" />
-            {/* Optional: Add a subtle badge/dot if cart has items */}
-            {/* <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span> */}
+          {/* Mobile Menu Toggle */}
+          <button 
+            onClick={() => setIsMobileOpen(true)}
+            className="md:hidden text-2xl text-stone-800 p-2"
+          >
+            <FiMenu />
+          </button>
+
+          {/* Logo */}
+          <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
+            <h1 className="text-xl md:text-2xl font-serif tracking-widest text-stone-900 uppercase">
+              InStyle<span className="font-light italic text-stone-500 text-lg">by</span>Shifa
+            </h1>
           </Link>
 
-          <Link href="/login" className="group">
-            <FiUser className="text-2xl text-gray-800 cursor-pointer group-hover:text-gray-600 transition-colors" />
-          </Link>
-        </div>
-      </div>
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {NAV_LINKS.map((link) => (
+              <div 
+                key={link.label} 
+                className="relative group"
+                onMouseEnter={() => link.hasDropdown && setIsAbayaOpen(true)}
+                onMouseLeave={() => link.hasDropdown && setIsAbayaOpen(false)}
+              >
+                <Link
+                  href={link.href}
+                  className={`text-[10px] font-bold uppercase tracking-[0.3em] transition-all ${link.highlight ? "text-[#D4AF37]" : "text-stone-600 hover:text-black"}`}
+                >
+                  {link.label}
+                </Link>
 
-      {/* Mobile Dropdown Menu - Clean, padded look */}
-      {mobileOpen && (
-        <div className="md:hidden px-6 pb-6 pt-2 space-y-4 border-t border-gray-100/70 bg-white shadow-lg">
-          {/* Search Bar inside dropdown */}
-          <div className="flex w-full items-center rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
-            <FiSearch className="text-gray-500 text-lg" />
-            <input
-              type="text"
-              placeholder="Search for products..."
-              className="ml-3 flex-1 bg-transparent outline-none text-base placeholder-gray-400"
-            />
+                {link.hasDropdown && isAbayaOpen && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="absolute left-0 pt-6 w-48">
+                    <div className="bg-white border border-stone-100 shadow-xl py-3 rounded-sm">
+                      {ABAYA_SUBMENU.map((item) => (
+                        <Link key={item.label} href={item.href} className="block px-6 py-2 text-[9px] uppercase tracking-widest text-stone-500 hover:text-black hover:bg-stone-50">
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            ))}
           </div>
-          <Link href="/product" className="block py-2 text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
-            Shop
-          </Link>
-          <Link href="/sale" className="block py-2 text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
-            On Sale
-          </Link>
-          <Link href="/new-arrivals" className="block py-2 text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
-            New Arrivals
-          </Link>
-          <Link href="/brands" className="block py-2 text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
-            Brands
-          </Link>
+
+          {/* Right Icons */}
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="hidden md:block"><FiUser className="text-xl text-stone-800" /></Link>
+            <Link href="/cart" className="relative p-2">
+              <FiShoppingCart className="text-xl text-stone-800" />
+              <span className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+            </Link>
+          </div>
         </div>
-      )}
-    </nav>
+      </nav>
+
+      {/* Mobile Drawer Overlay */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <>
+            {/* Dark semi-transparent background so the hero still "shows" through a bit */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileOpen(false)}
+              className="fixed inset-0 bg-black/40 z-[110] backdrop-blur-[2px] md:hidden"
+            />
+            
+            {/* Sidebar Menu */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-[80%] max-w-[320px] bg-white z-[120] shadow-2xl md:hidden flex flex-col p-8"
+            >
+              <div className="flex justify-between items-center mb-12">
+                <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Menu</span>
+                <button onClick={() => setIsMobileOpen(false)} className="text-2xl"><FiX /></button>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {NAV_LINKS.map((link) => (
+                  <div key={link.label}>
+                    <div className="flex justify-between items-center group">
+                      <Link
+                        href={link.href}
+                        onClick={() => !link.hasDropdown && setIsMobileOpen(false)}
+                        className={`text-xl font-serif ${link.highlight ? "text-[#D4AF37]" : "text-stone-800"}`}
+                      >
+                        {link.label}
+                      </Link>
+                      {link.hasDropdown && (
+                        <FiChevronDown 
+                          className={`transition-transform ${isAbayaOpen ? 'rotate-180' : ''}`} 
+                          onClick={() => setIsAbayaOpen(!isAbayaOpen)}
+                        />
+                      )}
+                    </div>
+                    
+                    {link.hasDropdown && isAbayaOpen && (
+                      <div className="mt-4 ml-4 flex flex-col gap-4 border-l border-stone-100 pl-4">
+                        {ABAYA_SUBMENU.map((item) => (
+                          <Link key={item.label} href={item.href} onClick={() => setIsMobileOpen(false)} className="text-xs uppercase tracking-widest text-stone-500">
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-auto pt-8 border-t border-stone-100 flex gap-6">
+                 <Link href="/login" onClick={() => setIsMobileOpen(false)} className="text-xs uppercase font-bold tracking-widest">Account</Link>
+                 <Link href="/cart" onClick={() => setIsMobileOpen(false)} className="text-xs uppercase font-bold tracking-widest text-[#D4AF37]">Cart (0)</Link>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

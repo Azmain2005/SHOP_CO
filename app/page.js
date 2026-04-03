@@ -6,85 +6,86 @@ import TrendingCategories from "./components/TrendingCategories.js";
 import CollectionBanner from "./components/CollectionBanner.js";
 import FeaturedProducts from "./components/FeaturedProducts.js";
 
-// High-quality editorial fashion images for each collection
+// Modest women's fashion — editorial collection images (verified Unsplash IDs)
 const COLLECTION_IMAGES = {
-  mens:
-    "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=900&q=85&fit=crop",
-  womens:
-    "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=900&q=85&fit=crop",
-  casual:
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=900&q=85&fit=crop",
-  boys: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=900&q=85&fit=crop",
-  kids: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=900&q=85&fit=crop",
+  abaya:
+    "https://i.ibb.co.com/mC7hXR4C/abdul-raheem-kannath-CWD8-UDt3y-PI-unsplash.jpg",
+  kaftan:
+    "https://i.ibb.co.com/ymdYSwVq/image.png",
+  borka:
+    "https://i.ibb.co.com/NdtRb9GD/modern-stylish-muslim-woman-hijab-city-street.jpg",
+  hijab:"https://i.ibb.co.com/27Mm3Y7Y/muhammad-faiz-zulkeflee-Kr-R7x-En4-HV8-unsplash.jpg",
+  kids: "https://images.unsplash.com/photo-1542156822-6924d1a71ace?w=900&q=85&fit=crop",
 };
+
 
 export default function App() {
   return (
     <div className="bg-white">
-      {/* Top promo bar + Navigation */}
+      {/* Top promo + Navbar */}
       <PromoBanner />
       <Navbar />
 
-      {/* 1. Full-width festive hero banner */}
+      {/* 1. Festive Eid/Boishakhi hero banner */}
       <FestiveBanner />
 
-      {/* 2. Trending Categories thumbnail row */}
+      {/* 2. Trending Categories — Abaya, Kaftan, Borka, Hijab, Prayer Set, Kids */}
       <TrendingCategories />
 
-      {/* 3. Men's Collection — image on right */}
+      {/* 3. Abaya Collection — image right */}
       <CollectionBanner
-        title="MEN'S COLLECTION"
-        subtitle="New Season · 2024"
-        imageUrl={COLLECTION_IMAGES.mens}
+        title="ABAYA COLLECTION"
+        subtitle="Timeless Elegance · Modest Luxury"
+        imageUrl={COLLECTION_IMAGES.abaya}
         imageAlign="right"
         bgColor="bg-[#EDE8E1]"
-        href="/product?category=men"
+        href="/product?category=abaya"
       />
 
-      {/* 4. Women's Collection — image on left */}
+      {/* 4. Kaftan Collection — image left */}
       <CollectionBanner
-        title="WOMEN'S COLLECTION"
-        subtitle="Everyday Elegance"
-        imageUrl={COLLECTION_IMAGES.womens}
+        title="KAFTAN COLLECTION"
+        subtitle="Flowing Grace · Premium Fabrics"
+        imageUrl={COLLECTION_IMAGES.kaftan}
         imageAlign="left"
         bgColor="bg-[#F5F0EB]"
-        href="/product?category=women"
+        href="/product?category=kaftan"
       />
 
       {/* 5. Featured Products grid */}
       <FeaturedProducts />
 
-      {/* 6. Casual Collection — image on right */}
+      {/* 6. Borka Collection — image right */}
       <CollectionBanner
-        title="CASUAL COLLECTION"
-        subtitle="Relaxed · Refined · Ready"
-        imageUrl={COLLECTION_IMAGES.casual}
+        title="BORKA COLLECTION"
+        subtitle="Modest · Refined · Comfortable"
+        imageUrl={COLLECTION_IMAGES.borka}
         imageAlign="right"
         bgColor="bg-[#EAEAEA]"
-        href="/product?category=casual"
+        href="/product?category=borka"
       />
 
-      {/* 7. Boys Collection — image on left */}
+      {/* 7. Prayer Set — image left */}
       <CollectionBanner
-        title="BOYS COLLECTION"
-        subtitle="Cool Looks for Young Stars"
-        imageUrl={COLLECTION_IMAGES.boys}
+        title="HIJAB"
+        subtitle="Pure · Serene · Devotion"
+        imageUrl={COLLECTION_IMAGES.hijab}
         imageAlign="left"
         bgColor="bg-[#EAF0EE]"
-        href="/product?category=boys"
+        href="/product?category=hijab"
       />
 
-      {/* 8. Kids / Girls Collection — image on right */}
-      <CollectionBanner
+      {/* 8. Kids Modest Wear — image right */}
+      {/* <CollectionBanner
         title="KIDS COLLECTION"
-        subtitle="Playful · Comfortable · Bright"
+        subtitle="Modest Fashion for Little Ones"
         imageUrl={COLLECTION_IMAGES.kids}
         imageAlign="right"
         bgColor="bg-[#F0EAF5]"
         href="/product?category=kids"
-      />
+      /> */}
 
-      {/* Footer with newsletter */}
+      {/* Footer */}
       <Footer />
     </div>
   );

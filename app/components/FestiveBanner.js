@@ -2,56 +2,78 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import festiveImg from "../../public/festive_banner.png";
+// Consider naming this 'hero-banner' or 'modest-collection' for clarity
+import festiveImg from "../../public/woman-religious-pilgrimage-church.jpg";
 
-export default function FestiveBanner() {
+export default function LuxuryHero() {
   return (
-    <section className="w-full relative overflow-hidden bg-[#c8802a]">
-      {/* Background image fills full width */}
-      <div className="relative w-full" style={{ minHeight: "420px" }}>
-        <Image
-          src={festiveImg}
-          alt="Festive Collection Banner"
-          priority
-          className="w-full object-cover object-center"
-          style={{ maxHeight: "540px", width: "100%", objectFit: "cover" }}
-        />
+    <section className="relative w-full overflow-hidden bg-[#0a0a0a]">
+      {/* Container with dynamic heights for Mobile vs Desktop */}
+      <div className="relative w-full h-[60vh] min-h-[500px] lg:h-[85vh] max-h-[900px]">
+        
+        {/* Background Image with a professional Vignette */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={festiveImg}
+            alt="Modesta Luxury Collection"
+            fill
+            priority
+            className="object-cover object-top lg:object-center brightness-[0.85]"
+          />
+          {/* Elegant Gradient Overlay: Darker on bottom and left for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent lg:bg-gradient-to-r lg:from-black/60 lg:to-transparent" />
+        </div>
 
-        {/* Central overlay text */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center px-4"
-        >
-          <p
-            className="font-extrabold drop-shadow-lg leading-none"
-            style={{
-              fontSize: "clamp(2.5rem, 7vw, 6rem)",
-              color: "#c8102e",
-              fontFamily: "'Noto Serif Bengali', 'Hind Siliguri', serif",
-              textShadow: "2px 2px 8px rgba(255,255,255,0.6)",
-            }}
+        {/* Content Layer */}
+        <div className="relative z-10 container mx-auto h-full px-6 flex flex-col items-center lg:items-start justify-end lg:justify-center pb-12 lg:pb-0">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-2xl text-center lg:text-left"
           >
-            বৈশাখী উৎসব
-          </p>
-          <p
-            className="mt-2 font-bold drop-shadow"
-            style={{
-              fontSize: "clamp(1rem, 2.5vw, 1.75rem)",
-              color: "#7a1a1a",
-              textShadow: "1px 1px 4px rgba(255,255,255,0.5)",
-            }}
-          >
-            পহেলা বৈশাখ ১৪৩২
-          </p>
-          <Link
-            href="/product"
-            className="mt-6 inline-block bg-[#c8102e] text-white font-bold px-8 py-3 rounded-full shadow-lg hover:bg-[#a50d26] transition-all duration-300 hover:scale-105 text-sm md:text-base"
-          >
-            Shop the Collection
-          </Link>
-        </motion.div>
+            {/* Minimalist Subheading */}
+            <span className="block mb-4 text-[10px] md:text-xs font-bold tracking-[0.4em] uppercase text-[#D4AF37]">
+              The Art of Modesty
+            </span>
+
+            {/* Main Luxury Title */}
+            <h1 className="font-serif italic leading-[1.1] text-white text-5xl md:text-7xl lg:text-8xl mb-6">
+              Elegance <br /> 
+              <span className="not-italic font-light">Redefined.</span>
+            </h1>
+            
+            <p className="max-w-md mx-auto lg:mx-0 mb-10 text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed font-light tracking-wide">
+              Discover our curated collection of artisanal Abayas and Kaftans, 
+              designed for the modern woman who values tradition and sophistication.
+            </p>
+
+            {/* Premium Button Set */}
+            <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start items-center">
+              <Link
+                href="/product"
+                className="group relative overflow-hidden bg-white text-black px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] transition-all duration-500 hover:text-white"
+              >
+                <span className="relative z-10">Explore Collection</span>
+                <div className="absolute inset-0 z-0 bg-[#D4AF37] translate-y-full transition-transform duration-500 group-hover:translate-y-0" />
+              </Link>
+
+              <Link
+                href="/about"
+                className="text-white text-xs font-bold uppercase tracking-[0.2em] border-b border-white/30 pb-1 hover:border-[#D4AF37] transition-colors duration-300"
+              >
+                The Atelier
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Subtle Bottom Accent (Scroll Indicator Style) */}
+        <div className="absolute bottom-10 right-10 hidden lg:block">
+           <p className="text-white/30 text-[10px] rotate-90 origin-right tracking-[0.3em] uppercase">
+             Est. 2024 — Modesta
+           </p>
+        </div>
       </div>
     </section>
   );
