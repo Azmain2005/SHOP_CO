@@ -99,7 +99,7 @@ export default function CartPage() {
   });
 
 
-useEffect(() => {
+  useEffect(() => {
     const fetchCart = async () => {
       try {
         const cartId = localStorage.getItem("cartId");
@@ -143,7 +143,7 @@ useEffect(() => {
             if (item.attributes && item.product.attributes) {
               // Get the key/value the user picked (e.g., size: "m")
               const selectedEntries = Object.entries(item.attributes);
-              
+
               if (selectedEntries.length > 0) {
                 const [selectedKey, selectedVal] = selectedEntries[0];
 
@@ -157,7 +157,7 @@ useEffect(() => {
                   const valueObj = productAttr.values.find(
                     (v) => v.val.toLowerCase() === selectedVal.toLowerCase()
                   );
-                  
+
                   // If we found a specific price for this variant, use it!
                   if (valueObj && valueObj.price) {
                     selectedPrice = valueObj.price;
@@ -337,8 +337,19 @@ useEffect(() => {
 
 
 
-// This will now use the correct variant price automatically:
-const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);  const deliveryFee = subtotal > 0 ? 150 : 0; // Only charge delivery if cart isn't empty
+  // Inside your CartPage component, before the return:
+
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  // Dynamic delivery fee logic
+  const getDeliveryFee = () => {
+    if (subtotal === 0) return 0;
+    if (formData.city === "Inside Dhaka") return 80;
+    if (formData.city === "Outside Dhaka") return 150;
+    return 150; // Default or fallback fee
+  };
+
+  const deliveryFee = getDeliveryFee();
   const total = subtotal + deliveryFee;
 
   return (
@@ -439,16 +450,18 @@ const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 
             {/* Row 3: City and Area */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col">
-                <label className="text-sm font-bold text-gray-700 mb-2 ml-1">City Name *</label>
-                <input
-                  type="text"
-                  placeholder="Enter City"
-                  className="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black transition-all"
-                  required
+                <label className="text-sm font-bold text-gray-700 mb-2 ml-1">City / Region *</label>
+                <select
                   name="city"
                   value={formData.city}
                   onChange={handleFormFieldChange}
-                />
+                  required
+                  className="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black transition-all appearance-none"
+                >
+                  <option value="">Select your location</option>
+                  <option value="Inside Dhaka">Inside Dhaka (80 TK)</option>
+                  <option value="Outside Dhaka">Outside Dhaka (150 TK)</option>
+                </select>
               </div>
               <div className="flex flex-col">
                 <label className="text-sm font-bold text-gray-700 mb-2 ml-1">Order Note (Optional)</label>
@@ -468,7 +481,9 @@ const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 
               <label className="text-sm font-bold text-gray-700 mb-3 block ml-1">Payment Method</label>
               <div className="flex items-center p-4 border-2 border-black rounded-2xl bg-gray-50">
                 <div className="w-4 h-4 rounded-full bg-black mr-3"></div>
-                <span className="font-bold text-gray-900">Cash on Delivery: charge (150tk)</span>
+                <span className="font-bold text-gray-900">
+                  Cash on Delivery: Delivery Charge ({deliveryFee}tk)
+                </span>
               </div>
             </div>
           </form>

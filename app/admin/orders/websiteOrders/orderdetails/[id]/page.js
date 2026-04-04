@@ -135,10 +135,22 @@ export default function OrderPage({ params }) {
     );
 
     const { cartId, name, number, address, city, orderStatus, createdAt } = order;
+
     const subtotal = cartId?.products?.reduce((acc, item) => {
         const actualPrice = getAttributePrice(item);
         return acc + (actualPrice * item.count);
     }, 0) || 0;
+
+    // 1. Determine the fee based on the city string stored in the order
+    const deliveryFee = city?.toLowerCase().includes("inside dhaka") ? 80 : 150;
+    
+    // 2. Calculate the final total
+    const totalAmount = subtotal + deliveryFee;
+    
+    // 3. Set a safe currency string
+    const currency = cartId?.currency || "BDT";
+
+
 
     return (
         <div className="min-h-screen bg-white w-full">
@@ -297,53 +309,62 @@ export default function OrderPage({ params }) {
                             </motion.div>
                         ))}
                     </div>
+{/* Right Column: Order Sidebar */}
+<div className="lg:col-span-4 space-y-6">
 
-                    {/* Right Column: Order Sidebar */}
-                    <div className="lg:col-span-4 space-y-6">
-
-                        {/* Shipping & Billing Info */}
-                        <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-xl space-y-8 sticky top-10">
-                            <div>
-                                <h4 className="text-[10px] uppercase font-black text-gray-300 tracking-[0.3em] mb-6 text-center">Logistics Port</h4>
-                                <div className="space-y-5">
-                                    <div className="flex gap-4 items-center">
-                                        <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-lg"><User size={18} /></div>
-                                        <span className="font-black uppercase tracking-tighter text-lg">{name}</span>
-                                    </div>
-                                    <div className="flex gap-4 items-center">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100"><Phone size={18} /></div>
-                                        <span className="font-bold text-gray-600">{number}</span>
-                                    </div>
-                                    <div className="flex gap-4 items-start">
-                                        <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 flex-shrink-0"><MapPin size={18} /></div>
-                                        <span className="font-bold text-gray-500 leading-tight uppercase text-xs">
-                                            {address}, <br /><span className="text-black font-black text-sm">{city}</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-gray-100">
-                                <h4 className="text-[10px] uppercase font-black text-gray-300 tracking-[0.3em] mb-6 text-center">Summary</h4>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-sm font-bold tracking-tight text-gray-500 uppercase">
-                                        <span>Subtotal</span>
-                                        <span className="font-black text-black">{subtotal} {cartId.currency}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm font-bold tracking-tight text-gray-500 uppercase">
-                                        <span>Delivery Fee</span>
-                                        <span className="font-black text-emerald-600">+150 BDT</span>
-                                    </div>
-                                    <div className="flex justify-between items-center pt-5 border-t border-dashed border-gray-200 mt-5">
-                                        <span className="text-xl font-black uppercase italic tracking-tighter">Total</span>
-                                        <span className="text-3xl font-black italic tracking-tighter text-black">
-                                            {subtotal + 150} {cartId.currency}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    {/* Shipping & Billing Info */}
+    <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-xl space-y-8 sticky top-10">
+        <div>
+            <h4 className="text-[10px] uppercase font-black text-gray-300 tracking-[0.3em] mb-6 text-center">Logistics Port</h4>
+            <div className="space-y-5">
+                <div className="flex gap-4 items-center">
+                    <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-lg">
+                        <User size={18} />
                     </div>
+                    <span className="font-black uppercase tracking-tighter text-lg">{name}</span>
+                </div>
+                <div className="flex gap-4 items-center">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                        <Phone size={18} />
+                    </div>
+                    <span className="font-bold text-gray-600">{number}</span>
+                </div>
+                <div className="flex gap-4 items-start">
+                    <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 flex-shrink-0">
+                        <MapPin size={18} />
+                    </div>
+                    <span className="font-bold text-gray-500 leading-tight uppercase text-xs">
+                        {address}, <br />
+                        <span className="text-black font-black text-sm">{city}</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div className="pt-6 border-t border-gray-100">
+            <h4 className="text-[10px] uppercase font-black text-gray-300 tracking-[0.3em] mb-6 text-center">Summary</h4>
+            <div className="space-y-4">
+                <div className="flex justify-between items-center text-sm font-bold tracking-tight text-gray-500 uppercase">
+                    <span>Subtotal</span>
+                    <span className="font-black text-black">{subtotal} {currency}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-bold tracking-tight text-gray-500 uppercase">
+                    <div className="flex flex-col">
+                        <span>Delivery Fee</span>
+                        <span className="text-[9px] text-gray-400 normal-case">{city}</span>
+                    </div>
+                    <span className="font-black text-emerald-600">+{deliveryFee} {currency}</span>
+                </div>
+                <div className="flex justify-between items-center pt-5 border-t border-dashed border-gray-200 mt-5">
+                    <span className="text-xl font-black uppercase italic tracking-tighter">Total</span>
+                    <span className="text-3xl font-black italic tracking-tighter text-black">
+                        {totalAmount} {currency}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                 </div>
             </main>
