@@ -23,8 +23,10 @@ export default function App() {
   return (
     <div className="bg-white">
       {/* Top promo + Navbar */}
-      <PromoBanner />
-      <Navbar />
+      <div className="sticky top-0 z-[60]"> {/* Keeps Nav on top of Sidebar */}
+        <PromoBanner />
+        <Navbar />
+      </div>
 
       {/* 1. Festive Eid/Boishakhi hero banner */}
       <FestiveBanner />

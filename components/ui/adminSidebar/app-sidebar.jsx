@@ -31,19 +31,17 @@ const items = [
       { title: "Attribute", url: "/admin/attribute" },
     ],
   },
-  { title: "Flash sales", url: "#", icon: Star },
-  { title: "POS system", url: "#", icon: ShoppingCart },
+  // { title: "Flash sales", url: "#", icon: Star },
   {
     title: "Orders",
     icon: DollarSign,
     sub_items: [
       { title: "Website Orders", url: "/admin/orders/websiteOrders" },
-      { title: "POS Orders", url: "/admin/orders/posOrders" },
+      { title: "POS Orders", url: "/admin/" },
     ],
   },
   { title: "Users", url: "/admin/user", icon: Users },
   { title: "Subscription", url: "/admin/subscription", icon: Layers },
-  { title: "Withdrawal", url: "#", icon: DollarSign },
   { title: "Settings", url: "#", icon: Settings },
 ];
 

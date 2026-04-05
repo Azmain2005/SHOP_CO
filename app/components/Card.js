@@ -1,76 +1,85 @@
-// app/components/Card.js
 "use client";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Card({ image, title, price, hoverImage }) {
+export default function Card({ image, title, price, hoverImage, category = "Collection" }) {
   return (
-    <div className="flex flex-col w-full group cursor-pointer">
-      {/* Image Container: Tall, elegant ratio */}
-      <div className="relative w-full aspect-[3/4] overflow-hidden bg-[#F9F8F6]">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className="flex flex-col w-full group cursor-pointer bg-white"
+    >
+      {/* Image Container: High-Fashion Portrait Ratio */}
+      <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#F5F5F3]">
         
+        {/* Subtle Brand Watermark (Optional luxury touch) */}
+        <div className="absolute top-4 left-4 z-10">
+          <span className="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-light italic">
+            {category}
+          </span>
+        </div>
+
         {/* Primary Image */}
         <Image
           src={image || "/placeholder.png"}
           alt={title}
           fill
-          className={`object-cover transition-all duration-[1.5s] ease-out group-hover:scale-105 ${
+          className={`object-cover transition-transform duration-[2s] cubic-bezier(0.2, 0, 0, 1) group-hover:scale-110 ${
             hoverImage ? "group-hover:opacity-0" : ""
           }`}
-          unoptimized
+          priority
         />
 
-        {/* Secondary Image (Visible on Hover) */}
+        {/* Secondary Image: Slow Cross-Fade */}
         {hoverImage && (
           <Image
             src={hoverImage}
-            alt={`${title} alternate view`}
+            alt={`${title} detail`}
             fill
-            className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 scale-110 group-hover:scale-100 transition-all duration-[1.2s] ease-in-out"
-            unoptimized
+            className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-[1.5s] ease-in-out scale-105 group-hover:scale-100"
           />
         )}
 
-        {/* Minimalist "Quick View" Overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out bg-white/10 backdrop-blur-md border-t border-white/20">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-white text-center font-medium">
-              View Creation
+        {/* Luxury "Shop" Indicator: Appears as a soft glow/blur */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-stone-900/5 backdrop-blur-[2px]">
+          <div className="px-6 py-3 border border-white/40 bg-white/10 backdrop-blur-md">
+            <p className="text-[10px] uppercase tracking-[0.5em] text-white font-light">
+              Discover
             </p>
+          </div>
         </div>
       </div>
 
-      {/* Details Section: Center Aligned & Spaced */}
-      <div className="mt-6 flex flex-col items-center text-center">
-        {/* Category/Status Label */}
-        <span className="text-[9px] uppercase tracking-[0.5em] text-[#D4AF37] mb-2 font-semibold">
-          L'Atelier
-        </span>
-
-        {/* Product Title: High-Contrast Serif */}
-        <h3 className="text-base md:text-lg font-serif text-stone-900 tracking-tight leading-tight max-w-[90%] truncate">
+      {/* Details Section */}
+      <div className="pt-8 pb-4 flex flex-col items-center text-center px-2">
+        
+        {/* Title: Using a serif stack for that "Vogue" feel */}
+        <h3 className="text-sm md:text-base font-serif italic text-stone-800 tracking-wide mb-2 transition-colors duration-500 group-hover:text-stone-500">
           {title}
         </h3>
 
-        {/* Price & Currency: Clean Sans-Serif */}
-        <div className="mt-2 relative overflow-hidden h-6 w-full flex justify-center">
-           <motion.p 
-             initial={{ y: 0 }}
-             whileHover={{ y: -30 }}
-             className="text-[13px] font-light tracking-[0.15em] text-stone-500 absolute"
-           >
-             ${price}
-           </motion.p>
-           
-           {/* Hidden "Explore" text that slides up on hover */}
-           <motion.p 
-             initial={{ y: 30 }}
-             whileHover={{ y: 0 }}
-             className="text-[10px] uppercase tracking-[0.3em] text-stone-900 font-bold absolute"
-           >
-             Details
-           </motion.p>
+        {/* Price & Interaction Container */}
+        <div className="relative h-5 w-full flex flex-col items-center overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              className="flex flex-col items-center"
+              transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
+            >
+              {/* Static Price State */}
+              <span className="text-[12px] font-light tracking-[0.2em] text-stone-400 group-hover:-translate-y-10 transition-transform duration-700">
+                — ${Number(price).toLocaleString()} —
+              </span>
+
+              {/* Hover Action State */}
+              <span className="absolute text-[9px] uppercase tracking-[0.4em] text-stone-900 font-medium translate-y-10 group-hover:translate-y-0 transition-transform duration-700">
+                View Selection
+              </span>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

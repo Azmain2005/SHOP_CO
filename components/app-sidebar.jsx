@@ -1,5 +1,5 @@
 "use client";
-import { RefreshCw, Tag, CircleDollarSign, ArrowUpDown, Check } from "lucide-react";
+import { RefreshCw, Tag, CircleDollarSign, ArrowUpDown, Check, X } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 
@@ -16,7 +16,6 @@ export function AppSidebar({ storedProducts = [], onFilterApply }) {
   const [sortOrder, setSortOrder] = useState("");
   const [priceRange, setPriceRange] = useState([0, 99000]);
 
-  // 1. Fetch Brands
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -30,14 +29,11 @@ export function AppSidebar({ storedProducts = [], onFilterApply }) {
     fetchBrands();
   }, []);
 
-  // 2. Dynamic Max Price logic
   const maxProductPrice = useMemo(() => {
     if (!storedProducts || storedProducts.length === 0) return 99000;
-    // Add a small buffer to the max price
     return Math.max(...storedProducts.map((p) => p.selling || 0)) + 100;
   }, [storedProducts]);
 
-  // 3. Sync Slider when Max Price changes (fixes the $6500 issue)
   useEffect(() => {
     if (maxProductPrice > 0) {
       setPriceRange([0, maxProductPrice]);
@@ -61,113 +57,114 @@ export function AppSidebar({ storedProducts = [], onFilterApply }) {
   };
 
   return (
-    <Sidebar className="border-r border-gray-100">
+    <Sidebar className="border-r border-stone-100">
       <SidebarContent className="bg-white">
-        <SidebarGroup>
-          {/* Header */}
-          <SidebarGroupLabel className="flex justify-between items-center px-5 py-8 border-b border-gray-100 mb-4">
-            <span className="text-xl font-bold text-gray-900 tracking-tight">Filters</span>
-            <button 
-              onClick={handleReset} 
-              className="p-2 hover:bg-gray-100 rounded-full transition-all active:scale-95 group"
-              title="Reset Filters"
-            >
-              <RefreshCw size={18} className="text-gray-500 group-hover:text-black" />
-            </button>
-          </SidebarGroupLabel>
-
-          {/* Sort Section */}
-          <div className="px-5 mb-8">
-            <div className="flex items-center gap-2 mb-4 text-gray-900">
-              <ArrowUpDown size={16} />
-              <p className="font-semibold text-sm uppercase tracking-wider">Sort by Price</p>
-            </div>
-            <div className="grid grid-cols-1 gap-2">
-              <button 
-                onClick={() => setSortOrder(sortOrder === "low-high" ? "" : "low-high")}
-                className={`text-xs p-3 rounded-xl border transition-all flex justify-between items-center ${
-                  sortOrder === "low-high" ? "bg-black text-white border-black" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-                }`}
-              >
-                Low to High
-                {sortOrder === "low-high" && <Check size={14} />}
-              </button>
-              <button 
-                onClick={() => setSortOrder(sortOrder === "high-low" ? "" : "high-low")}
-                className={`text-xs p-3 rounded-xl border transition-all flex justify-between items-center ${
-                  sortOrder === "high-low" ? "bg-black text-white border-black" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-                }`}
-              >
-                High to Low
-                {sortOrder === "high-low" && <Check size={14} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Brand Section */}
-          <div className="px-5 mb-8">
-            <div className="flex items-center gap-2 mb-4 text-gray-900">
-              <Tag size={16} />
-              <p className="font-semibold text-sm uppercase tracking-wider">Brand</p>
-            </div>
-            <div className="space-y-1 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+        {/* Added top padding to ensure content starts below your Navbar/TopBar */}
+        <div className="pt-16 md:pt-2"> 
+          <SidebarGroup>
+            {/* Minimalist Header */}
+            <div className="flex justify-between items-center px-6 mb-10">
+              <div>
+                <h2 className="text-2xl font-serif italic text-stone-900 tracking-tight">Filters</h2>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-stone-400 mt-1">Refine your selection</p>
+              </div>
               <button
-                onClick={() => setSelectedBrand("")}
-                className={`w-full text-left text-xs p-2.5 rounded-lg transition-colors ${
-                  selectedBrand === "" ? "bg-gray-100 font-bold text-black" : "text-gray-500 hover:bg-gray-50"
-                }`}
+                onClick={handleReset}
+                className="group flex items-center gap-2 text-[10px] uppercase tracking-widest text-stone-400 hover:text-black transition-colors"
               >
-                All Brands
+                Reset <RefreshCw size={12} className="group-hover:rotate-180 transition-transform duration-500" />
               </button>
-              {brands.map((b) => (
+            </div>
+
+            {/* Sort Section */}
+            <div className="px-6 mb-12">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 mb-5 flex items-center gap-2">
+                <ArrowUpDown size={14} className="text-stone-400" /> Sort Order
+              </p>
+              <div className="space-y-2">
+                {[
+                  { id: "low-high", label: "Price: Low to High" },
+                  { id: "high-low", label: "Price: High to Low" }
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSortOrder(sortOrder === opt.id ? "" : opt.id)}
+                    className={`w-full text-left text-xs px-4 py-3 rounded-lg border transition-all duration-300 flex justify-between items-center ${
+                      sortOrder === opt.id 
+                        ? "bg-stone-900 text-white border-stone-900" 
+                        : "bg-white text-stone-600 border-stone-100 hover:border-stone-300"
+                    }`}
+                  >
+                    {opt.label}
+                    {sortOrder === opt.id && <Check size={14} strokeWidth={3} />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Brand Section */}
+            <div className="px-6 mb-12">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 mb-5 flex items-center gap-2">
+                <Tag size={14} className="text-stone-400" /> Brand
+              </p>
+              <div className="space-y-1 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
                 <button
-                  key={b._id}
-                  onClick={() => setSelectedBrand(b._id)}
-                  className={`w-full text-left text-xs p-2.5 rounded-lg transition-colors flex justify-between items-center ${
-                    selectedBrand === b._id ? "bg-gray-100 font-bold text-black" : "text-gray-500 hover:bg-gray-50"
+                  onClick={() => setSelectedBrand("")}
+                  className={`w-full text-left text-xs py-2 px-3 rounded-md transition-all ${
+                    selectedBrand === "" ? "bg-stone-50 font-bold text-black border-l-2 border-stone-900" : "text-stone-400 hover:text-stone-900"
                   }`}
                 >
-                  {b.title}
-                  {selectedBrand === b._id && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                  All Brands
                 </button>
-              ))}
+                {brands.map((b) => (
+                  <button
+                    key={b._id}
+                    onClick={() => setSelectedBrand(b._id)}
+                    className={`w-full text-left text-xs py-2 px-3 rounded-md transition-all flex justify-between items-center ${
+                      selectedBrand === b._id ? "bg-stone-50 font-bold text-black border-l-2 border-stone-900" : "text-stone-400 hover:text-stone-900"
+                    }`}
+                  >
+                    {b.title}
+                    {selectedBrand === b._id && <span className="w-1 h-1 bg-stone-900 rounded-full" />}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Price Range Section */}
-          <div className="px-5 mb-8">
-            <div className="flex items-center gap-2 mb-4 text-gray-900">
-              <CircleDollarSign size={16} />
-              <p className="font-semibold text-sm uppercase tracking-wider">Price Range</p>
-            </div>
-            <div className="px-2">
-              <Slider 
-                value={priceRange} 
-                max={maxProductPrice} 
-                step={1}
-                onValueChange={setPriceRange} 
-                className="my-6"
-              />
-              <div className="flex justify-between items-center">
-                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5">
-                  <span className="text-[10px] text-gray-400 block uppercase">Min</span>
-                  <span className="text-xs font-bold">${priceRange[0]}</span>
-                </div>
-                <div className="h-[1px] w-4 bg-gray-200" />
-                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5 text-right">
-                  <span className="text-[10px] text-gray-400 block uppercase">Max</span>
-                  <span className="text-xs font-bold">${priceRange[1]}</span>
+            {/* Price Range Section */}
+            <div className="px-6 mb-20">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 mb-5 flex items-center gap-2">
+                <CircleDollarSign size={14} className="text-stone-400" /> Price Range
+              </p>
+              <div className="px-2">
+                <Slider
+                  value={priceRange}
+                  max={maxProductPrice}
+                  step={10}
+                  onValueChange={setPriceRange}
+                  className="my-8"
+                />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 text-center py-2 border border-stone-100 rounded-lg">
+                    <span className="text-[9px] uppercase text-stone-400 block mb-0.5">Min</span>
+                    <span className="text-xs font-bold text-stone-900">{priceRange[0]} TK</span>
+                  </div>
+                  <div className="w-2 h-[1px] bg-stone-200" />
+                  <div className="flex-1 text-center py-2 border border-stone-100 rounded-lg">
+                    <span className="text-[9px] uppercase text-stone-400 block mb-0.5">Max</span>
+                    <span className="text-xs font-bold text-stone-900">{priceRange[1]} TK</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </SidebarGroup>
+          </SidebarGroup>
+        </div>
 
-        {/* Footer Action */}
-        <div className="p-5 mt-auto border-t border-gray-100 bg-white sticky bottom-0">
-          <button 
-            onClick={handleApply} 
-            className="w-full bg-black text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
+        {/* Floating Action Footer */}
+        <div className="px-6 py-8 mt-auto border-t border-stone-50 bg-white/80 backdrop-blur-md sticky bottom-0">
+          <button
+            onClick={handleApply}
+            className="w-full bg-stone-900 text-white py-5 rounded-full font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-stone-800 transition-all active:scale-[0.98] shadow-2xl shadow-stone-200"
           >
             Apply Changes
           </button>

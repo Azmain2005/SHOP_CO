@@ -24,7 +24,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="w-full bg-white/90 backdrop-blur-md border-b border-stone-100 sticky top-0 z-[100] h-20">
+      <nav className="w-full bg-white/90 backdrop-blur-md border-b border-stone-100 sticky top-0 z-[40] h-20">
         <div className="max-w-[1440px] mx-auto h-full px-6 flex items-center justify-between">
           
           {/* Mobile Menu Toggle */}
