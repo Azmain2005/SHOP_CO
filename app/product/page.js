@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation"; // 1. Import this
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -16,12 +17,13 @@ import {
 import PromoBanner from "../components/topBar";
 
 async function fetchProducts(page = 1, filters = {}) {
-  const { brand, minPrice, maxPrice, sort } = filters;
+  const { brand, minPrice, maxPrice, sort ,category} = filters;
   const params = new URLSearchParams({
     brand: brand || "",
     minPrice: minPrice || 0,
     maxPrice: maxPrice || 99000,
-    sort: sort || ""
+    sort: sort || "",
+    category: category || ""
   });
 
   const res = await fetch(
@@ -32,17 +34,30 @@ async function fetchProducts(page = 1, filters = {}) {
 }
 
 export default function Page() {
+  const searchParams = useSearchParams();
+  const categoryId = searchParams.get("category");
+
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
-    brand: "", minPrice: 0, maxPrice: 99000, sort: ""
+    brand: "", minPrice: 0, maxPrice: 99000, sort: "", category: categoryId || ""
   });
+
+    useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      category: categoryId || ""
+    }));
+    setCurrentPage(1);
+  }, [categoryId]);
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ["all-products", currentPage, filters],
     queryFn: () => fetchProducts(currentPage, filters),
+    placeholderData: (previousData) => previousData,
     keepPreviousData: true,
   });
+
 
   useEffect(() => {
     setFilteredProducts(productsData?.data || []);

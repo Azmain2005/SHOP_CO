@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiShoppingCart, FiUser, FiChevronDown, FiX, FiMenu, FiChevronRight } from "react-icons/fi";
+import { FiShoppingCart, FiUser, FiX, FiMenu, FiChevronRight } from "react-icons/fi";
 
 const NAV_LINKS = [
   { label: "Collections", href: "/product" },
@@ -15,25 +15,26 @@ export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isProductOpen, setIsProductOpen] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [activeParent, setActiveParent] = useState(null);
+  const [activeParentId, setActiveParentId] = useState(null);
+
+  // Find the currently hovered parent object
+  const activeParent = categories.find(c => c._id === activeParentId);
+  const hasSubCategories = activeParent?.subCategories?.length > 0;
 
   useEffect(() => {
     const fetchNavData = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categorie`);
         const data = await res.json();
-        
         if (Array.isArray(data)) {
           const parents = data.filter(cat => cat.type === "parent");
           const children = data.filter(cat => cat.type === "child");
-
           const organized = parents.map(parent => ({
             ...parent,
             subCategories: children.filter(child => child.parentid === parent._id)
           }));
-          
           setCategories(organized);
-          if (organized.length > 0) setActiveParent(organized[0]._id);
+          if (organized.length > 0) setActiveParentId(organized[0]._id);
         }
       } catch (err) {
         console.error("Failed to fetch nav categories", err);
@@ -74,47 +75,59 @@ export default function Navbar() {
                   {link.hasDropdown && isProductOpen && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }} 
-                      animate={{ opacity: 1, y: 0 }} 
+                      animate={{ 
+                        opacity: 1, 
+                        y: 0, 
+                        width: hasSubCategories ? "600px" : "220px" // Dynamic Width
+                      }} 
                       exit={{ opacity: 0, y: 5 }}
-                      className="absolute top-20 left-[-50%] w-[600px] bg-white border border-stone-100 shadow-2xl rounded-sm overflow-hidden flex"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="absolute top-20 left-0 bg-white border border-stone-100 shadow-2xl rounded-sm overflow-hidden flex"
                     >
-                      {/* Left Side: Parent Categories */}
-                      <div className="w-1/3 bg-stone-50 border-r border-stone-100 py-2">
+                      {/* Parent Categories List */}
+                      <div className={`${hasSubCategories ? 'w-1/3' : 'w-full'} bg-stone-50 border-r border-stone-100 py-2 transition-all duration-300`}>
                         {categories.map((parent) => (
                           <div
                             key={parent._id}
-                            onMouseEnter={() => setActiveParent(parent._id)}
+                            onMouseEnter={() => setActiveParentId(parent._id)}
                             className={`group/item flex items-center justify-between transition-colors ${
-                              activeParent === parent._id ? "bg-white" : "hover:bg-stone-100"
+                              activeParentId === parent._id ? "bg-white" : "hover:bg-stone-100"
                             }`}
                           >
                             <Link
                               href={`/product?category=${parent._id}`}
-                              className={`flex-1 px-6 py-4 text-[10px] uppercase tracking-widest transition-all ${
-                                activeParent === parent._id ? "text-black font-bold" : "text-stone-500 hover:text-black"
+                              className={`flex-1 px-5 py-3 text-[9px] uppercase tracking-widest transition-all ${
+                                activeParentId === parent._id ? "text-black font-bold" : "text-stone-500 hover:text-black"
                               }`}
                             >
                               {parent.title}
                             </Link>
-                            {activeParent === parent._id && parent.subCategories.length > 0 && (
-                              <FiChevronRight className="mr-4 text-stone-400" />
+                            {/* Arrow only shows if there are sub-items to expand to */}
+                            {parent.subCategories.length > 0 && (
+                              <FiChevronRight className={`mr-3 text-stone-300 ${activeParentId === parent._id ? 'text-black' : ''}`} size={12} />
                             )}
                           </div>
                         ))}
                       </div>
 
-                      {/* Right Side: Sub Categories */}
-                      <div className="w-2/3 p-8 grid grid-cols-2 gap-y-4 gap-x-8 bg-white content-start">
-                        {categories.find(c => c._id === activeParent)?.subCategories.map((sub) => (
-                          <Link 
-                            key={sub._id} 
-                            href={`/product?category=${sub._id}`}
-                            className="text-[10px] uppercase tracking-[0.15em] text-stone-500 hover:text-[#D4AF37] transition-colors border-b border-transparent hover:border-[#D4AF37] pb-1 w-fit"
-                          >
-                            {sub.title}
-                          </Link>
-                        ))}
-                      </div>
+                      {/* Sub Categories Panel - Only visible if active parent has items */}
+                      {hasSubCategories && (
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="w-2/3 p-8 grid grid-cols-2 gap-y-4 gap-x-8 bg-white content-start"
+                        >
+                          {activeParent.subCategories.map((sub) => (
+                            <Link 
+                              key={sub._id} 
+                              href={`/product?category=${sub._id}`}
+                              className="text-[10px] uppercase tracking-[0.15em] text-stone-500 hover:text-[#D4AF37] transition-colors border-b border-transparent hover:border-[#D4AF37] pb-1 w-fit"
+                            >
+                              {sub.title}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -132,7 +145,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Condensed sub-category logic) */}
       <AnimatePresence>
         {isMobileOpen && (
           <>
@@ -147,27 +160,21 @@ export default function Navbar() {
                 {NAV_LINKS.map((link) => (
                   <div key={link.label}>
                     <Link href={link.href} onClick={() => !link.hasDropdown && setIsMobileOpen(false)} className="text-xl font-serif text-stone-800 uppercase tracking-wider">{link.label}</Link>
-                    
                     {link.hasDropdown && (
-                      <div className="mt-6 flex flex-col gap-8">
+                      <div className="mt-6 flex flex-col gap-6">
                         {categories.map(parent => (
-                          <div key={parent._id} className="space-y-4">
+                          <div key={parent._id} className="space-y-3">
                             <Link 
                               href={`/product?category=${parent._id}`}
                               onClick={() => setIsMobileOpen(false)}
-                              className="text-[11px] font-black uppercase tracking-[0.2em] text-stone-900 block border-b border-stone-100 pb-2"
+                              className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 block border-b border-stone-50 pb-1"
                             >
                               {parent.title}
                             </Link>
                             {parent.subCategories.length > 0 && (
-                              <div className="flex flex-col gap-4 ml-3">
+                              <div className="grid grid-cols-2 gap-3 ml-2">
                                 {parent.subCategories.map(sub => (
-                                  <Link 
-                                    key={sub._id} 
-                                    href={`/product?category=${sub._id}`} 
-                                    onClick={() => setIsMobileOpen(false)} 
-                                    className="text-[10px] uppercase tracking-widest text-stone-500 hover:text-black"
-                                  >
+                                  <Link key={sub._id} href={`/product?category=${sub._id}`} onClick={() => setIsMobileOpen(false)} className="text-[10px] uppercase tracking-widest text-stone-500">
                                     {sub.title}
                                   </Link>
                                 ))}
