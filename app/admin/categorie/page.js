@@ -34,32 +34,35 @@ export default function CategoryPage() {
   const [editingTitle, setEditingTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [type, setType] = useState("parent"); // Default to 'parent'
+  const [parentId, setParentId] = useState(""); // Stores selected parent's _id
+
   const router = useRouter();
 
 
 
-    const checkJWT = async () => {
-      const token = localStorage.getItem('auth_token');
-  
-      if (!token) {
-        router.push('/account/login');
-        return;
-      }
-      try {
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-  
-        console.log(decoded.exp);
-        console.log(currentTime);
-        if (decoded.exp < currentTime) {
-          localStorage.removeItem('auth_token');
-          router.push('/account/login');
-        }
-      } catch (error) {
+  const checkJWT = async () => {
+    const token = localStorage.getItem('auth_token');
+
+    if (!token) {
+      router.push('/account/login');
+      return;
+    }
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      console.log(decoded.exp);
+      console.log(currentTime);
+      if (decoded.exp < currentTime) {
         localStorage.removeItem('auth_token');
         router.push('/account/login');
       }
+    } catch (error) {
+      localStorage.removeItem('auth_token');
+      router.push('/account/login');
     }
+  }
 
 
   // Fetch all categories
@@ -88,30 +91,39 @@ export default function CategoryPage() {
     }
 
     setLoading(true);
-
     const token = localStorage.getItem("auth_token");
 
+    // Prepare the payload
+    const payload = {
+      title,
+      type,
+      parentid: type === "child" ? parentId : null,
+    };
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categorie`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
-        body: JSON.stringify({ title }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
       });
-      const data = await res.json();
+
       if (res.ok) {
         setMessage("Success: Category added successfully!");
         setTitle("");
+        setType("parent"); // Reset
+        setParentId(""); // Reset
         fetchCategories();
       } else {
+        const data = await res.json();
         setMessage(data.error || "Something went wrong");
       }
     } catch (err) {
       setMessage("Server error: " + err.message);
     } finally {
       setLoading(false);
-      // Clear message after 3 seconds
       setTimeout(() => setMessage(""), 3000);
     }
   };
@@ -125,8 +137,10 @@ export default function CategoryPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categorie/${id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
       });
       if (res.ok) {
         setMessage("Success: Category deleted");
@@ -151,8 +165,10 @@ export default function CategoryPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categorie/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ title: editingTitle }),
       });
       if (res.ok) {
@@ -200,8 +216,8 @@ export default function CategoryPage() {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive
-                      ? "bg-gray-900 text-white shadow-lg shadow-gray-200"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-black"
+                    ? "bg-gray-900 text-white shadow-lg shadow-gray-200"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-black"
                     }`}
                 >
                   <Icon size={16} />
@@ -226,6 +242,7 @@ export default function CategoryPage() {
               </div>
 
               <form onSubmit={handleSingleSubmit} className="space-y-6">
+                {/* Category Title */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700 ml-1">Category Title</label>
                   <input
@@ -238,12 +255,54 @@ export default function CategoryPage() {
                   />
                 </div>
 
+                {/* Type Selection (Parent vs Child) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 ml-1">Category Type</label>
+                  <div className="flex gap-4">
+                    {["parent", "child"].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setType(t)}
+                        className={`flex-1 py-3 rounded-xl border-2 font-bold capitalize transition-all ${type === t
+                          ? "border-black bg-black text-white"
+                          : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200"
+                          }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Conditional Parent Selection Dropdown */}
+                {type === "child" && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Select Parent Category</label>
+                    <select
+                      value={parentId}
+                      onChange={(e) => setParentId(e.target.value)}
+                      className="w-full bg-gray-50 border border-transparent p-4 rounded-2xl focus:bg-white focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all text-gray-800"
+                      required={type === "child"}
+                    >
+                      <option value="">-- Choose a Parent --</option>
+                      {categories
+                        .filter((cat) => cat.type === "parent")
+                        .map((parent) => (
+                          <option key={parent._id} value={parent._id}>
+                            {parent.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={loading}
                   className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all text-lg ${loading
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-black hover:bg-gray-800 text-white shadow-xl shadow-gray-200 active:scale-[0.98]"
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-black hover:bg-gray-800 text-white shadow-xl shadow-gray-200 active:scale-[0.98]"
                     }`}
                 >
                   {loading ? "Creating..." : <><Plus size={22} /> Create Category</>}
@@ -252,8 +311,8 @@ export default function CategoryPage() {
 
               {message && (
                 <div className={`mt-6 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold border animate-in fade-in slide-in-from-top-2 ${message.toLowerCase().includes("success")
-                    ? "bg-green-50 text-green-700 border-green-100"
-                    : "bg-red-50 text-red-700 border-red-100"
+                  ? "bg-green-50 text-green-700 border-green-100"
+                  : "bg-red-50 text-red-700 border-red-100"
                   }`}>
                   {message.toLowerCase().includes("success") ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                   {message}
@@ -316,6 +375,11 @@ export default function CategoryPage() {
                                 <Tag size={20} />
                               </div>
                               <span className="text-gray-800 font-bold text-lg truncate">{category.title}</span>
+                              {category.type === 'child' && (
+                                <span className="ml-2 text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                                  Sub-category
+                                </span>
+                              )}
                             </div>
                           )}
                         </div>
