@@ -17,7 +17,7 @@ import {
 import PromoBanner from "../components/topBar";
 
 async function fetchProducts(page = 1, filters = {}) {
-  const { brand, minPrice, maxPrice, sort ,category} = filters;
+  const { brand, minPrice, maxPrice, sort, category } = filters;
   const params = new URLSearchParams({
     brand: brand || "",
     minPrice: minPrice || 0,
@@ -35,29 +35,32 @@ async function fetchProducts(page = 1, filters = {}) {
 
 export default function Page() {
   const searchParams = useSearchParams();
-  const categoryId = searchParams.get("category");
+  const categoryName = searchParams.get("category");
+  const isId = /^[0-9a-fA-F]{24}$/.test(categoryName || "");
+  const displayTitle = isId ? "Selected" : categoryName;
 
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
-    brand: "", minPrice: 0, maxPrice: 99000, sort: "", category: categoryId || ""
+    brand: "",
+    minPrice: 0,
+    maxPrice: 99000,
+    sort: "",
+    // category: categoryName || ""  <-- Remove this line
   });
 
-    useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      category: categoryId || ""
-    }));
+  useEffect(() => {
     setCurrentPage(1);
-  }, [categoryId]);
+  }, [categoryName]);
 
   const { data: productsData, isLoading, error } = useQuery({
-    queryKey: ["all-products", currentPage, filters],
-    queryFn: () => fetchProducts(currentPage, filters),
+    queryKey: ["all-products", currentPage, filters, categoryName],
+    queryFn: () => fetchProducts(currentPage, {
+      ...filters,
+      category: categoryName || "" // Inject URL param directly here
+    }),
     placeholderData: (previousData) => previousData,
-    keepPreviousData: true,
   });
-
 
   useEffect(() => {
     setFilteredProducts(productsData?.data || []);
@@ -94,7 +97,7 @@ export default function Page() {
       <SidebarProvider>
         {/* FIX: The flex container below ensures Sidebar and Main are side-by-side */}
         <div className="flex w-full max-w-[1440px] mx-auto min-h-screen">
-          
+
           <AppSidebar
             storedProducts={productsData?.data || []}
             onFilterApply={handleFilterApply}
@@ -106,10 +109,10 @@ export default function Page() {
             <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-6 border-b border-stone-100 pb-8">
               <div>
                 <span className="text-[10px] uppercase tracking-[0.4em] text-[#D4AF37] font-bold mb-2 block">
-                  The Collection
+                  {displayTitle ? displayTitle : "The Collection"}
                 </span>
-                <h1 className="text-4xl md:text-5xl font-serif tracking-tight text-stone-900">
-                  All <span className="italic">Creations</span>
+                <h1 className="text-4xl md:text-5xl font-serif tracking-tight text-stone-900 capitalize">
+                  {displayTitle ? displayTitle : "All"} <span className="italic">Creations</span>
                 </h1>
               </div>
 
@@ -130,8 +133,8 @@ export default function Page() {
             {filteredProducts.length === 0 ? (
               <div className="flex flex-col justify-center items-center py-40 text-center">
                 <p className="font-serif italic text-xl text-stone-400">No pieces found in this selection.</p>
-                <button 
-                  onClick={() => handleFilterApply({brand: "", minPrice: 0, maxPrice: 99000, sort: ""})}
+                <button
+                  onClick={() => handleFilterApply({ brand: "", minPrice: 0, maxPrice: 99000, sort: "" })}
                   className="mt-4 text-[10px] uppercase tracking-widest border-b border-stone-300 pb-1 hover:border-stone-900 transition-colors"
                 >
                   Clear Filters
@@ -140,7 +143,7 @@ export default function Page() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-16 lg:gap-x-10">
                 {filteredProducts.map((product) => (
-                  <motion.div 
+                  <motion.div
                     key={product._id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -174,10 +177,10 @@ export default function Page() {
                     </button>
 
                     <div className="flex items-center gap-2 px-8">
-                       <span className="text-xs font-serif italic text-stone-400">Page</span>
-                       <span className="text-sm font-bold">{currentPage}</span>
-                       <span className="text-xs font-serif italic text-stone-400 mx-1">of</span>
-                       <span className="text-sm font-bold">{productsData?.totalPages || 1}</span>
+                      <span className="text-xs font-serif italic text-stone-400">Page</span>
+                      <span className="text-sm font-bold">{currentPage}</span>
+                      <span className="text-xs font-serif italic text-stone-400 mx-1">of</span>
+                      <span className="text-sm font-bold">{productsData?.totalPages || 1}</span>
                     </div>
 
                     <button
