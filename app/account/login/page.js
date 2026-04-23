@@ -44,11 +44,13 @@ export default function LuxuryLogin() {
         alert(data.error || "Identity Verification Failed");
       }
     } catch (err) {
-      alert("Security Server Offline");
+      alert("Too many attempt happen, please wait for 2 minutes.");
     }finally {
       setIsLoading(false); 
     }
   };
+
+  
 
 const checkExistingAuth = () => {
   const token = localStorage.getItem('auth_token');

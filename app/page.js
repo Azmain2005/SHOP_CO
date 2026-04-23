@@ -83,7 +83,7 @@ export default function App() {
       <TrendingCategories />
 
       {/* 3. Abaya Collection */}
-      <CollectionBanner
+      {/* <CollectionBanner
         title="ABAYA COLLECTION"
         subtitle="Timeless Elegance · Modest Luxury"
         imageUrl={COLLECTION_IMAGES.abaya}
@@ -91,17 +91,17 @@ export default function App() {
         bgColor="bg-[#EDE8E1]"
         // This sends "abaya" to the product page URL
         href="/product?category=abaya"
-      />
+      /> */}
 
       {/* 4. Kaftan Collection — image left */}
-      <CollectionBanner
+      {/* <CollectionBanner
         title="KAFTAN COLLECTION"
         subtitle="Flowing Grace · Premium Fabrics"
         imageUrl={COLLECTION_IMAGES.kaftan}
         imageAlign="left"
         bgColor="bg-[#F5F0EB]"
         href="/product?category=kaftan"
-      />
+      /> */}
 
       {/* 5. Featured Products grid */}
       <FeaturedProducts />
@@ -117,14 +117,14 @@ export default function App() {
       />
 
       {/* 7. Prayer Set — image left */}
-      <CollectionBanner
+      {/* <CollectionBanner
         title="HIJAB"
         subtitle="Pure · Serene · Devotion"
         imageUrl={COLLECTION_IMAGES.hijab}
         imageAlign="left"
         bgColor="bg-[#EAF0EE]"
         href="/product?category=hijab"
-      />
+      /> */}
 
       {/* 8. Kids Modest Wear — image right */}
       {/* <CollectionBanner

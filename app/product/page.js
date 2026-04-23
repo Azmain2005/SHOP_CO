@@ -49,6 +49,53 @@ export default function Page() {
     // category: categoryName || ""  <-- Remove this line
   });
 
+
+    // --- Cart Synchronization Logic ---
+  const ensureActiveCart = async () => {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const existingId = localStorage.getItem("cartId");
+
+    const createNewCart = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/cart`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ products: [], cartStatus: "editing", currency: "BDT" }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        localStorage.setItem("cartId", data._id);
+        console.log("Atelier Session Initialized:", data._id);
+      } catch (err) {
+        console.error("Cart setup failed", err);
+      }
+    };
+
+    if (existingId) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/cart/${existingId}`);
+        if (res.ok) {
+          const cart = await res.json();
+          // If the existing cart is already checked out (pending/completed), create a new one
+          if (cart.cartStatus !== "editing") await createNewCart();
+        } else {
+          await createNewCart(); // ID not found in DB
+        }
+      } catch (err) {
+        console.warn("Sync delayed due to network.");
+      }
+    } else {
+      await createNewCart();
+    }
+  };
+
+
+    useEffect(() => {
+    ensureActiveCart();
+  }, []);
+
+
+
   useEffect(() => {
     setCurrentPage(1);
   }, [categoryName]);
