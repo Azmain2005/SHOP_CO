@@ -31,6 +31,7 @@
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.542.0",
+    "mime-types": "^3.0.2",
     "mogoose": "^0.0.1-security",
     "mongoose": "^8.18.1",
     "motion": "^12.23.22",

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import axios from "axios";
 
 
 
@@ -30,6 +31,7 @@ export default function BrandPage() {
 
   // States
   const [title, setTitle] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [photoUrl, setPhotoUrl] = useState("");
   const [brands, setBrands] = useState([]);
   const [message, setMessage] = useState("");
@@ -78,7 +80,30 @@ export default function BrandPage() {
     }
   }
 
+  const uploadFileOnBunney = async (file) => {
+    try {
+      if (!file) return null;
 
+      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+      // Call your OWN server, not Bunny.net
+      const response = await fetch(`/api/upload?file=${fileName}`, {
+        method: "PUT",
+        body: file,
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        console.log("Upload Success:", data.url);
+        return data.url;
+      }
+      return null;
+    } catch (error) {
+      console.error("Upload Error:", error);
+      return null;
+    }
+  };
 
 
   useEffect(() => {
@@ -100,17 +125,37 @@ export default function BrandPage() {
 
 
     try {
+      let finalPhotoUrl = photoUrl;
+
+      // 1. If a new file was selected, upload it to Bunny.net first
+      if (selectedFile) {
+        setMessage("Uploading image to CDN...");
+        const uploadedUrl = await uploadFileOnBunney(selectedFile);
+
+        if (!uploadedUrl) {
+          throw new Error("Failed to upload image to CDN. Brand not created.");
+        }
+        finalPhotoUrl = uploadedUrl;
+      }
+
+
+      // 2. Now send the data (with the brand-new URL) to your backend
+      setMessage("Saving brand to database...");
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/brand`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
-        body: JSON.stringify({ title, photoUrl }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, photoUrl: finalPhotoUrl }),
       });
+
       const data = await res.json();
       if (res.ok) {
         setMessage("Success: Brand added successfully!");
         setTitle("");
         setPhotoUrl("");
+        setSelectedFile(null);
         fetchBrands();
       } else {
         setMessage(data.error || "Something went wrong");
@@ -133,8 +178,10 @@ export default function BrandPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/brand/${id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
       });
       if (res.ok) {
         setMessage("Success: Brand deleted");
@@ -160,8 +207,10 @@ export default function BrandPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/brand/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ title: editingTitle }),
       });
       if (res.ok) {
@@ -209,8 +258,8 @@ export default function BrandPage() {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive
-                      ? "bg-gray-900 text-white shadow-lg shadow-gray-200"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-black"
+                    ? "bg-gray-900 text-white shadow-lg shadow-gray-200"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-black"
                     }`}
                 >
                   <Icon size={16} />
@@ -251,17 +300,22 @@ export default function BrandPage() {
                 </div>
 
                 <div className="space-y-2 group">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Logo URL</label>
+                  <label className="text-sm font-bold text-gray-700 ml-1">Brand Logo</label>
                   <div className="relative">
                     <input
-                      type="text"
-                      placeholder="https://image-link.com/logo.png"
-                      value={photoUrl}
-                      onChange={(e) => setPhotoUrl(e.target.value)}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setSelectedFile(file);
+                          // Optional: Create a local preview URL
+                          setPhotoUrl(URL.createObjectURL(file));
+                        }
+                      }}
                       className="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl focus:bg-white focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all text-gray-800"
-                      required
                     />
-                    <ImageIcon className="absolute left-4 top-4 text-gray-400 group-focus-within:text-black transition-colors" size={20} />
+                    <ImageIcon className="absolute left-4 top-4 text-gray-400" size={20} />
                   </div>
                 </div>
 
@@ -269,8 +323,8 @@ export default function BrandPage() {
                   type="submit"
                   disabled={loading}
                   className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all text-lg mt-2 ${loading
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-black hover:bg-gray-800 text-white shadow-xl shadow-gray-200 active:scale-[0.98]"
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-black hover:bg-gray-800 text-white shadow-xl shadow-gray-200 active:scale-[0.98]"
                     }`}
                 >
                   {loading ? "Processing..." : <><Plus size={22} /> Create Brand</>}
@@ -279,8 +333,8 @@ export default function BrandPage() {
 
               {message && (
                 <div className={`mt-6 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold border animate-in fade-in slide-in-from-top-2 ${message.toLowerCase().includes("success")
-                    ? "bg-green-50 text-green-700 border-green-100"
-                    : "bg-red-50 text-red-700 border-red-100"
+                  ? "bg-green-50 text-green-700 border-green-100"
+                  : "bg-red-50 text-red-700 border-red-100"
                   }`}>
                   {message.toLowerCase().includes("success") ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                   {message}
