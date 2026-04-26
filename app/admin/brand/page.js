@@ -111,6 +111,9 @@ export default function BrandPage() {
     fetchBrands();
   }, []);
 
+
+
+
   // Add brand
   const handleSingleSubmit = async (e) => {
     e.preventDefault();
@@ -168,24 +171,57 @@ export default function BrandPage() {
     }
   };
 
+
+
+  const deleteFileFromBunny = async (fullUrl) => {
+    try {
+      // Splits by '/' and takes the last part (the filename)
+      const fileName = fullUrl.split('/').pop();
+
+      const response = await fetch(`/api/delete-file?file=${fileName}`, {
+        method: "DELETE",
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error("CDN Delete Error:", error);
+      return false;
+    }
+  };
+
+
   // Delete brand
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this brand?")) return;
+  const handleDelete = async (brand) => {
+    if (!confirm(`Are you sure you want to delete ${brand.title}?`)) return;
 
     const token = localStorage.getItem("auth_token");
 
-
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/brand/${id}`, {
+      // FIX: Use brand._id instead of id
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/brand/${brand._id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
       });
+
       if (res.ok) {
+        // 1. Success message for DB deletion
         setMessage("Success: Brand deleted");
+
+        // 2. Clean up the image from Bunny.net if it exists
+        if (brand.photoUrl) {
+          const cdnDeleted = await deleteFileFromBunny(brand.photoUrl);
+          if (cdnDeleted) {
+            console.log("CDN file successfully removed.");
+          }
+        }
+
         fetchBrands();
+      } else {
+        const errorData = await res.json();
+        setMessage(errorData.error || "Failed to delete brand from database");
       }
     } catch (err) {
       setMessage("Server error: " + err.message);
@@ -385,12 +421,11 @@ export default function BrandPage() {
                         <div className="flex items-center gap-5 flex-1 overflow-hidden">
                           <div className="relative w-16 h-16 bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                             <Image
-                              src={brand.photoUrl || `${process.env.NEXT_PUBLIC_BACKEND_URL}uploads/${brand.imageUrl || "placeholder.png"}`}
+                              src={brand.photoUrl || "/placeholder.png"}
                               alt={brand.title}
                               width={64}
                               height={64}
                               className="object-contain p-2"
-                              onError={(e) => (e.target.src = "/placeholder.png")}
                             />
                           </div>
 
@@ -427,7 +462,7 @@ export default function BrandPage() {
                               <button onClick={() => startEditing(brand)} className="p-3 text-gray-400 hover:text-black hover:bg-gray-50 rounded-xl transition-colors">
                                 <Edit3 size={18} />
                               </button>
-                              <button onClick={() => handleDelete(brand._id)} className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                              <button onClick={() => handleDelete(brand)} className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
                                 <Trash2 size={18} />
                               </button>
                             </>
