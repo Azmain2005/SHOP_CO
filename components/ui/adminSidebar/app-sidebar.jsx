@@ -28,7 +28,6 @@ const items = [
       { title: "Brands", url: "/admin/brand" },
       { title: "Tax rule", url: "/admin/taxrule" },
       { title: "Collection", url: "/admin/collection" },
-      { title: "Attribute", url: "/admin/attribute" },
     ],
   },
   // { title: "Flash sales", url: "#", icon: Star },

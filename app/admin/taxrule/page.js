@@ -191,7 +191,7 @@ export default function TaxPage() {
     <div className="min-h-screen w-full bg-[#fdfdfd] text-gray-900 font-sans">
 
       {/* HEADER */}
-      <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
+      {/* <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="w-full px-6 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
@@ -213,7 +213,7 @@ export default function TaxPage() {
             })}
           </nav>
         </div>
-      </header>
+      </header> */}
 
       {/* MAIN CONTENT */}
       <main className="w-full p-6 lg:p-10">
