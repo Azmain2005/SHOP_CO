@@ -10,7 +10,7 @@ export async function PUT(request) {
 
     // Upload to Bunny.net from the Server (No CORS issues here!)
     const response = await fetch(
-      `https://sg.storage.bunnycdn.com/instyle-shop/brands/${fileName}`,
+      ` ${process.env.BUNNY_UPLOAD_URL}/${fileName}`,
       {
         method: "PUT",
         headers: {
@@ -23,7 +23,7 @@ export async function PUT(request) {
 
     if (response.ok) {
       return NextResponse.json({ 
-        url: `https://instyle-shop.b-cdn.net/brands/${fileName}` 
+        url: `${process.env.BUNNY_RESPONCE_URL}/${fileName}` 
       });
     }
     

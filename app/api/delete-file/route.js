@@ -11,7 +11,7 @@ export async function DELETE(request) {
 
     // The endpoint matches your Singapore region from previous screenshots
     const response = await fetch(
-      `https://sg.storage.bunnycdn.com/instyle-shop/brands/${fileName}`,
+      `${process.env.BUNNY_UPLOAD_URL}/${fileName}`,
       {
         method: "DELETE",
         headers: {
