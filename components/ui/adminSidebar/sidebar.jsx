@@ -28,7 +28,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
+const SIDEBAR_WIDTH_ICON = "5rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 const SidebarContext = React.createContext(null)
@@ -140,82 +140,60 @@ function Sidebar({
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
-  if (collapsible === "none") {
-    return (
-      <div
-        data-slot="sidebar"
-        className={cn(
-          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
-          className
-        )}
-        {...props}>
-        {children}
-      </div>
-    );
-  }
-
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
           data-sidebar="sidebar"
-          data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar  text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE
-            }
-          }
-          side={side}>
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
+          className="w-[var(--sidebar-width-mobile)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          style={{ "--sidebar-width": "var(--sidebar-width-mobile)" }}
+          side={side}
+        >
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
-    );
+    )
   }
 
   return (
     <div
-      className="  group peer text-sidebar-foreground hidden md:block"
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
       data-side={side}
-      data-slot="sidebar">
-      {/* This is what handles the sidebar gap on desktop */}
+      className={cn(
+        "group peer hidden md:block text-sidebar-foreground transition-[width] duration-300 ease-in-out",
+        "data-[state=collapsed]:w-[var(--sidebar-width-icon)] w-[var(--sidebar-width)]",
+        className
+      )}
+      {...props}
+    >
+      {/* Ghost div to maintain layout spacing */}
       <div
-        data-slot="sidebar-gap"
         className={cn(
-          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
-          "group-data-[collapsible=offcanvas]:w-0",
-          "group-data-[side=right]:rotate-180",
-
+          "duration-300 relative h-svh w-[var(--sidebar-width)] bg-transparent transition-[width] ease-in-out",
+          "group-data-[state=collapsed]:w-[var(--sidebar-width-icon)]"
         )}
       />
-<div
-  data-slot="sidebar-container"
-  className={cn(
-    "fixed inset-y-0 z-10 hidden h-svh w-[var(--sidebar-width)] transition-[left,right,width] duration-200 ease-linear md:flex",
-    side === "left"
-      ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
-      : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-    className
-  )}
-  {...props}
->
+      <div
+        className={cn(
+          "duration-300 fixed inset-y-0 z-10 hidden h-svh w-[var(--sidebar-width)] transition-[left,right,width] ease-in-out md:flex",
+          "group-data-[side=left]:left-0 group-data-[side=right]:right-0",
+          "group-data-[state=collapsed]:w-[var(--sidebar-width-icon)]",
+          "border-r border-gray-100", // Your luxury border
+          className
+        )}
+      >
         <div
           data-sidebar="sidebar"
-          data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded- group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm">
+          className="flex h-full w-full flex-col bg-white"
+        >
           {children}
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function SidebarTrigger({
