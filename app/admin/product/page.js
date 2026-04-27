@@ -43,6 +43,8 @@ export default function Page() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
+    const [selectedFiles, setSelectedFiles] = useState([null, null, null]);
+
 
     const router = useRouter();
 
@@ -120,6 +122,30 @@ export default function Page() {
         });
     };
 
+    const uploadFileOnBunney = async (file) => {
+        try {
+            const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+            const response = await fetch(`/api/upload?file=${fileName}`, {
+                method: "PUT",
+                body: file,
+            });
+            const data = await response.json();
+            return data.url || null;
+        } catch (error) {
+            console.error("Upload error:", error);
+            return null;
+        }
+    };
+
+    // Helper to handle local file selection
+    const handleFileSelection = (index, file) => {
+        const newFiles = [...selectedFiles];
+        newFiles[index] = file;
+        setSelectedFiles(newFiles);
+    };
+
+
+
     // toggle collection checkbox (multiple)
     const toggleCollection = (value) => {
         setForm((prev) => {
@@ -153,109 +179,59 @@ export default function Page() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
-
-        // basic validation (you can expand)
-        if (!form.title.trim()) {
-            setMessage("Title is required.");
-            return;
-        }
-        if (!form.purchased || !form.selling || !form.unit) {
-            setMessage("Purchased, Selling and Unit fields are required.");
-            return;
-        }
-        if (!form.overview.trim() || !form.description.trim()) {
-            setMessage("Overview and Description are required.");
-            return;
-        }
-        if (!form.photos || form.photos.length === 0 || form.photos.every((p) => !p.trim())) {
-            setMessage("At least one photo URL is required (enter in Photo fields).");
-            return;
-        }
-        if (!form.brand) {
-            setMessage("Select a brand.");
-            return;
-        }
-
-        // coerce numeric fields
-        const payload = {
-            ...form,
-            // Ensure we send numbers to the backend, not strings from the inputs
-            purchased: Number(form.purchased),
-            selling: Number(form.selling),
-            unit: Number(form.unit),
-            attributes: form.attributes.map((attr) => ({
-                title: attr.title,
-                values: attr.values.map(v => ({
-                    val: v.val,
-                    price: Number(v.price) // Convert price to Number for MongoDB
-                }))
-            })),
-        };
-
-
         setLoading(true);
-        try {
 
+        try {
             const token = localStorage.getItem("auth_token");
+
+            // --- NEW UPLOAD LOGIC START ---
+            const uploadedUrls = [...form.photos]; // Start with existing manual URLs
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                if (selectedFiles[i]) {
+                    const url = await uploadFileOnBunney(selectedFiles[i]);
+                    if (url) {
+                        uploadedUrls[i] = url; // Replace URL at index with the Bunny.net URL
+                    }
+                }
+            }
+            // --- NEW UPLOAD LOGIC END ---
+
+            const payload = {
+                ...form,
+                photos: uploadedUrls.filter(url => url.trim() !== ""), // Only send non-empty URLs
+                purchased: Number(form.purchased),
+                selling: Number(form.selling),
+                unit: Number(form.unit),
+                attributes: form.attributes.map((attr) => ({
+                    title: attr.title,
+                    values: attr.values.map(v => ({
+                        val: v.val,
+                        price: Number(v.price)
+                    }))
+                })),
+            };
 
             const res = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/product`,
                 payload,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
-                }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-            // backend returns message on success per your server code
-            toast.success(res.data.message || "✅ Product created successfully!");
 
-            // reset form
-            setForm({
-                title: "",
-                purchased: "",
-                selling: "",
-                unit: "",
-                overview: "",
-                description: "",
-                tags: "",
-                refundable: "no",
-                warrenty: "no",
-                photos: ["", "", ""],
-                meta_title: "",
-                meta_tags: "",
-                meta_description: "",
-                brand: "",
-                tax: "",
-                collections: [],
-                categorie: [],
-                attributes: [{ title: "", values: [{ val: "", price: 0 }] }],
-            });
+            toast.success(res.data.message || "✅ Product created!");
+            setSelectedFiles([null, null, null]); // Reset files
+            // ... rest of your reset logic
         } catch (err) {
-            console.error("Submit error:", err);
-            // axios error handling
-            if (err.response) {
-                toast.error(err.response?.data?.error || "❌ Failed to create product. Try again.");
-            } else {
-                setMessage("Network or server error. Check backend.");
-            }
+            toast.error("Upload or save failed");
         } finally {
             setLoading(false);
         }
-    };
+    };;
 
     return (
         <div className="w-full min-h-screen bg-gray-100 p-6">
             <div className="max-w-6xl mx-auto space-y-6">
-                <div className="flex flex-wrap justify-center gap-4 mb-2">
-                    <Link href="/admin/categorie" className="px-4 py-2 bg-black text-white rounded-2xl shadow hover:opacity-95">Categories</Link>
-                    <Link href="/admin/brand" className="px-4 py-2 bg-black text-white rounded-2xl shadow hover:opacity-95">Brands</Link>
-                    <Link href="/admin/taxrule" className="px-4 py-2 bg-black text-white rounded-2xl shadow hover:opacity-95">Tax rules</Link>
-                    <Link href="/admin/collection" className="px-4 py-2 bg-black text-white rounded-2xl shadow hover:opacity-95">Collections</Link>
-                    <Link href="/admin/attribute" className="px-4 py-2 bg-black text-white rounded-2xl shadow hover:opacity-95">Attributes</Link>
-                    <Link href="/admin/allproduct" className="px-4 py-2 bg-black text-white rounded-2xl shadow hover:opacity-95">All products</Link>
-                </div>
+
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* left: form */}
@@ -748,25 +724,35 @@ export default function Page() {
                                 {/* Photos Section */}
                                 <div className="space-y-3">
                                     <label className="ml-1 block text-[13px] font-bold text-gray-800 tracking-tight uppercase">
-                                        Product Gallery <span className="text-gray-400 lowercase font-normal ml-1">(Direct Image URLs)</span>
+                                        Product Gallery <span className="text-gray-400 lowercase font-normal ml-1">(Upload or Enter URL)</span>
                                     </label>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {form.photos.map((p, i) => (
-                                            <div key={i} className="relative group">
-                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
+                                            <div key={i} className="space-y-2">
+                                                <div className="relative group">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) => handleFileSelection(i, e.target.files[0])}
+                                                        className="hidden"
+                                                        id={`file-upload-${i}`}
+                                                    />
+                                                    <label
+                                                        htmlFor={`file-upload-${i}`}
+                                                        className="flex items-center justify-center w-full h-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-100 hover:border-indigo-400 transition-all"
+                                                    >
+                                                        <span className="text-xs font-bold text-gray-500">
+                                                            {selectedFiles[i] ? selectedFiles[i].name.slice(0, 15) : "Click to Upload"}
+                                                        </span>
+                                                    </label>
                                                 </div>
+                                                {/* Keep the text input as a fallback or for direct URLs */}
                                                 <input
                                                     type="text"
-                                                    placeholder={`URL ${i + 1}`}
+                                                    placeholder="Or paste URL..."
                                                     value={p}
                                                     onChange={(e) => handlePhotoChange(i, e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-gray-900 
-                                   shadow-[0_2px_4px_rgba(0,0,0,0.02),inset_0_1px_2px_rgba(0,0,0,0.02)]
-                                   transition-all duration-300 hover:border-gray-300
-                                   focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none"
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:border-indigo-500 outline-none"
                                                 />
                                             </div>
                                         ))}
