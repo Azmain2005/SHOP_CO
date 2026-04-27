@@ -49,7 +49,7 @@ export default function ProductsPage() {
       console.log(decoded.exp);
       console.log(currentTime);
       if (decoded.exp < currentTime) {
-        
+
         localStorage.removeItem('auth_token');
         router.push('/account/login');
       }
@@ -77,20 +77,55 @@ export default function ProductsPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+  // 1. Add the CDN deletion helper function
+  const deleteFileFromBunny = async (fullUrl) => {
+    try {
+      // Splits by '/' and takes the last part (the filename)
+      const fileName = fullUrl.split('/').pop();
+
+      const response = await fetch(`/api/delete-file?file=${fileName}`, {
+        method: "DELETE",
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error("CDN Delete Error:", error);
+      return false;
+    }
+  };
+
+  // 2. Update the handleDelete function
+  const handleDelete = async (product) => { // Change 'id' to the whole 'product' object
+    if (!confirm(`Are you sure you want to delete "${product.title}" and its images?`)) return;
 
     const token = localStorage.getItem("auth_token");
 
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/product/${id}`, {
+      // First, delete from your database
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/product/${product._id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      setProducts((prev) => prev.filter((p) => p._id !== id));
-      toast.success("Product removed from inventory");
-    } catch {
+
+      // Second, if the product has photos, delete each one from Bunny.net
+      if (product.photos && product.photos.length > 0) {
+        toast.loading("Cleaning up images from CDN...");
+
+        // Loop through the photos array and delete each file
+        const deletePromises = product.photos
+          .filter(url => url && url.trim() !== "") // Only attempt to delete valid URLs
+          .map(url => deleteFileFromBunny(url));
+
+        await Promise.all(deletePromises);
+      }
+
+      // Update UI
+      setProducts((prev) => prev.filter((p) => p._id !== product._id));
+      toast.dismiss(); // Remove the loading toast
+      toast.success("Product and images removed successfully");
+    } catch (error) {
+      console.error(error);
       toast.error("Delete failed");
     }
   };
@@ -290,7 +325,7 @@ export default function ProductsPage() {
                             <Edit3 size={18} />
                           </Link>
                           <button
-                            onClick={() => handleDelete(p._id)}
+                            onClick={() => handleDelete(p)} // Pass the whole object 'p'
                             className="p-3 bg-white border border-gray-100 text-gray-400 hover:text-red-600 hover:border-red-100 rounded-xl transition-all shadow-sm hover:shadow-md"
                             title="Delete Product"
                           >
