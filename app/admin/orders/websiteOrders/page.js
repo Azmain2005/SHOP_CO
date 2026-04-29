@@ -119,7 +119,8 @@ export default function OrdersPage() {
                   <tr key={order._id} className="group hover:bg-gray-50/50 transition-all">
 
                     {/* PRODUCT IMAGES */}
-                    <td className="py-6 px-6 bg-gray-50/30 group-hover:bg-white rounded-l-[2.5rem]">
+                    
+                    {/* <td className="py-6 px-6 bg-gray-50/30 group-hover:bg-white rounded-l-[2.5rem]">
                       <div className="flex -space-x-4">
                         {order.cartId?.products?.map((item, idx) => (
                           <div key={idx} className="relative w-14 h-14 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-gray-200 transition-transform group-hover:scale-110 group-hover:z-30" style={{ zIndex: 10 - idx }}>
@@ -130,7 +131,28 @@ export default function OrdersPage() {
                           </div>
                         ))}
                       </div>
+                    </td> */}
+                    <td className="py-6 px-6 bg-gray-50/30 group-hover:bg-white rounded-l-[2.5rem]">
+                      <div className="flex">
+                        {order.cartId?.products?.[0] && (
+                          <div className="relative w-14 h-14 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-gray-200 transition-transform group-hover:scale-110 group-hover:z-30">
+                            <Image
+                              src={order.cartId.products[0].product?.photos?.[0] || "/placeholder.png"}
+                              alt="product"
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            {order.cartId.products[0].count > 1 && (
+                              <span className="absolute bottom-0 right-0 bg-black text-white text-[8px] px-1.5 py-0.5 font-black rounded-tl-lg z-40">
+                                {order.cartId.products[0].count}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
+
 
                     {/* CUSTOMER INFO */}
                     <td className="py-6 px-6 group-hover:bg-white">
