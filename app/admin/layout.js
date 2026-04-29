@@ -9,7 +9,7 @@ import FloatingSidebarTrigger from "./components/FloatingSidebarTrigger";
 import AdminNavbar from "../components/AdminNavbar";
 import { Toaster } from 'react-hot-toast';
 
-
+import MobileSidebarToggle from "./components/MobileSidebarToggle";
 
 
 
@@ -55,6 +55,7 @@ export default function AdminLayout({ children }) {
                         <SidebarProvider>                            
                             <AppSidebar />
                             <FloatingSidebarTrigger />
+                            <MobileSidebarToggle />
                             {children}
                             <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
                         </SidebarProvider>

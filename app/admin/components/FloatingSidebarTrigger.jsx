@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SidebarTrigger, useSidebar } from "@/components/ui/adminSidebar/sidebar";
+import { cn } from "@/lib/utils";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState(false);
@@ -25,7 +26,10 @@ export default function FloatingSidebarTrigger() {
 
   return (
     <SidebarTrigger
-      className={`fixed top-16 z-50 transition-all duration-300 ${leftClass}`}
+      className={cn(
+        "fixed top-16 z-50 transition-all duration-300 hidden md:flex", // hidden on mobile, flex on desktop
+        open ? "left-[calc(var(--sidebar-width)-2rem)]" : "left-4"
+      )}
     />
   );
 }

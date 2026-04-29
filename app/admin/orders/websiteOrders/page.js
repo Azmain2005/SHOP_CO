@@ -18,11 +18,7 @@ import { jwtDecode } from 'jwt-decode';
 // --- Animation & Nav Constants ---
 const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
 const itemVariants = { hidden: { y: 20, opacity: 0 }, show: { y: 0, opacity: 1 } };
-const navItems = [
-  { name: "ORDERS", href: "/orders", icon: ShoppingBag },
-  { name: "ALL PRODUCTS", href: "/admin/allproduct", icon: Package },
-  { name: "CATEGORIES", href: "/admin/categorie", icon: LayoutGrid },
-];
+
 
 export default function OrdersPage() {
   const pathname = usePathname();
@@ -87,11 +83,7 @@ export default function OrdersPage() {
             <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg"><Zap className="text-white" size={20} /></div>
             <span className="text-xl font-black tracking-tighter uppercase italic">Vantage Admin</span>
           </div>
-          <nav className="flex items-center bg-gray-100/80 p-1.5 rounded-2xl">
-            {navItems.map((nav) => (
-              <Link key={nav.href} href={nav.href} className={`px-5 py-2 rounded-xl text-[10px] font-black tracking-widest ${pathname === nav.href ? "bg-white text-black shadow-sm" : "text-gray-400"}`}>{nav.name}</Link>
-            ))}
-          </nav>
+
         </div>
       </header>
 
