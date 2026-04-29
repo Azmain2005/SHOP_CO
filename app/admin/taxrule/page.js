@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   Plus,
   Trash2,
@@ -9,26 +7,17 @@ import {
   Save,
   X,
   Percent,
-  LayoutGrid,
   Search,
-  Globe,
-  Layers,
-  Tag,
-  Package,
   FileText,
   Hash,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Receipt
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 
-
-
-
 export default function TaxPage() {
-  const pathname = usePathname();
-
   // States for new tax rule
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -41,14 +30,9 @@ export default function TaxPage() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter();
-
-
-
-
 
   // Editing state
   const [editingTax, setEditingTax] = useState({
@@ -68,10 +52,8 @@ export default function TaxPage() {
     }
   };
 
-
   const checkJWT = async () => {
     const token = localStorage.getItem('auth_token');
-
     if (!token) {
       router.push('/account/login');
       return;
@@ -79,9 +61,6 @@ export default function TaxPage() {
     try {
       const decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-
-      console.log(decoded.exp);
-      console.log(currentTime);
       if (decoded.exp < currentTime) {
         localStorage.removeItem('auth_token');
         router.push('/account/login');
@@ -101,23 +80,24 @@ export default function TaxPage() {
     e.preventDefault();
     setMessage("");
     setLoading(true);
-
     const token = localStorage.getItem("auth_token");
-
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tax`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`},
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ title, description, type, number }),
       });
-      const data = await res.json();
       if (res.ok) {
         setMessage("Success: Tax rule added!");
         setTitle(""); setDescription(""); setType("number"); setNumber("");
         fetchTaxes();
+        setTimeout(() => setIsModalOpen(false), 1500);
       } else {
+        const data = await res.json();
         setMessage(data.error || "Something went wrong");
       }
     } catch (err) {
@@ -132,9 +112,12 @@ export default function TaxPage() {
     if (!confirm("Are you sure you want to delete this tax rule?")) return;
     const token = localStorage.getItem("auth_token");
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tax/${id}`, { method: "DELETE" ,
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tax/${id}`, { 
+        method: "DELETE",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
       });
       if (res.ok) {
         setMessage("Success: Tax rule removed");
@@ -160,8 +143,10 @@ export default function TaxPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tax/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" ,
-          "Authorization": `Bearer ${token}`},
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify(editingTax),
       });
       if (res.ok) {
@@ -174,176 +159,259 @@ export default function TaxPage() {
     }
   };
 
-  const navItems = [
-    { name: "Categories", href: "/admin/categorie", icon: LayoutGrid },
-    { name: "Brands", href: "/admin/brand", icon: Globe },
-    { name: "Tax Rules", href: "/admin/taxrule", icon: Percent },
-    { name: "Collections", href: "/admin/collection", icon: Layers },
-    { name: "Attributes", href: "/admin/attribute", icon: Tag },
-    { name: "All Products", href: "/admin/allproduct", icon: Package },
-  ];
-
   const filteredTaxes = taxes.filter(tax =>
     tax.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen w-full bg-[#fdfdfd] text-gray-900 font-sans">
-
-      {/* HEADER */}
-      {/* <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="w-full px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-              <Percent className="text-white" size={20} />
-            </div>
-            <span className="text-xl font-bold tracking-tight">Financial Settings</span>
-          </div>
-
-          <nav className="flex flex-wrap items-center gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive ? "bg-black text-white shadow-lg" : "text-gray-500 hover:bg-gray-50 hover:text-black"}`}>
-                  <Icon size={16} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
+    <div className="min-h-screen bg-white text-[#1a1a1a] font-sans p-4 md:p-8 lg:p-10 w-full">
+      
+      {/* Header Section */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-10 gap-6 w-full">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Tax Configurations</h1>
+          <p className="text-gray-500 mt-2">Manage tax rates and financial rules for your store inventory.</p>
         </div>
-      </header> */}
+        
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="relative flex-grow">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search tax rules..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-11 pr-4 py-3 bg-[#f9f9f9] border border-gray-200 rounded-xl w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+            />
+          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-black text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all shadow-lg shadow-gray-200"
+          >
+            <Plus size={20} /> Add Tax Rule
+          </button>
+        </div>
+      </div>
 
-      {/* MAIN CONTENT */}
-      <main className="w-full p-6 lg:p-10">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-
-          {/* LEFT: FORM */}
-          <section className="xl:col-span-4">
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm sticky top-28">
-              <div className="mb-8">
-                <h2 className="text-3xl font-extrabold text-gray-900">Create Tax Rule</h2>
-                <p className="text-gray-500 mt-2">Define new tax rates for your products.</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Rule Title</label>
-                  <div className="relative">
-                    <input type="text" placeholder="e.g. VAT, GST, Sales Tax" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-gray-50 border-transparent p-4 pl-12 rounded-2xl focus:bg-white focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all" required />
-                    <FileText className="absolute left-4 top-4 text-gray-400" size={20} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Description (Optional)</label>
-                  <textarea placeholder="Purpose of this tax..." value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-gray-50 border-transparent p-4 rounded-2xl focus:bg-white focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all h-24 resize-none" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Type</label>
-                    <select value={type} onChange={(e) => setType(e.target.value)} className="w-full bg-gray-50 border-transparent p-4 rounded-2xl focus:bg-white focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all appearance-none cursor-pointer">
-                      <option value="number">Fixed Amount</option>
-                      <option value="percent">Percentage</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Rate Value</label>
-                    <div className="relative">
-                      <input type="number" placeholder="0.00" value={number} onChange={(e) => setNumber(e.target.value)} className="w-full bg-gray-50 border-transparent p-4 pl-12 rounded-2xl focus:bg-white focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all" required />
-                      <Hash className="absolute left-4 top-4 text-gray-400" size={20} />
-                    </div>
-                  </div>
-                </div>
-
-                <button type="submit" disabled={loading} className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all text-lg mt-4 ${loading ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800 text-white shadow-xl active:scale-[0.98]"}`}>
-                  {loading ? "Saving..." : <><Plus size={22} /> Add Tax Rule</>}
-                </button>
-              </form>
-
-              {message && (
-                <div className={`mt-6 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold border animate-in fade-in slide-in-from-top-2 ${message.toLowerCase().includes("success") ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-700 border-red-100"}`}>
-                  {message.toLowerCase().includes("success") ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-                  {message}
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* RIGHT: LIST */}
-          <section className="xl:col-span-8">
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm min-h-[70vh] flex flex-col overflow-hidden">
-              <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Tax Configurations</h3>
-                  <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Live Rules</p>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
-                  <input type="text" placeholder="Filter rules..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-12 pr-6 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none w-full md:w-72 transition-all" />
-                </div>
-              </div>
-
-              <div className="p-8">
-                {filteredTaxes.length === 0 ? (
-                  <div className="py-32 text-center text-gray-400 font-medium text-xl">No tax rules found.</div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {filteredTaxes.map((tax) => (
-                      <div key={tax._id} className="group flex flex-col p-6 rounded-[2rem] border border-gray-100 hover:border-black hover:shadow-2xl hover:shadow-gray-200/50 transition-all bg-white relative">
+      {/* Main Table Container */}
+      <div className="bg-white border border-gray-100 rounded-[1.5rem] shadow-sm w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="border-b border-gray-50 text-[11px] uppercase tracking-widest text-gray-400 font-bold bg-[#fafafa]">
+                <th className="px-8 py-6">Preview</th>
+                <th className="px-8 py-6">Rule Details</th>
+                <th className="px-8 py-6">Rate Value</th>
+                <th className="px-8 py-6">Type</th>
+                <th className="px-8 py-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filteredTaxes.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="py-24 text-center text-gray-400 font-medium">
+                    No tax rules found.
+                  </td>
+                </tr>
+              ) : (
+                filteredTaxes.map((tax) => (
+                  <tr key={tax._id} className="hover:bg-gray-50/50 transition-colors group">
+                    <td className="px-8 py-5">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                        tax.type === 'percent' ? 'bg-indigo-50 text-indigo-600' : 'bg-green-50 text-green-600'
+                      } group-hover:bg-black group-hover:text-white`}>
+                        {tax.type === 'percent' ? <Percent size={20} /> : <Hash size={20} />}
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      {editingId === tax._id ? (
+                        <div className="space-y-2 max-w-xs">
+                          <input
+                            type="text"
+                            value={editingTax.title}
+                            onChange={(e) => setEditingTax({ ...editingTax, title: e.target.value })}
+                            className="w-full border-2 border-black rounded-lg px-3 py-1.5 outline-none font-bold text-sm"
+                          />
+                          <textarea
+                            value={editingTax.description}
+                            onChange={(e) => setEditingTax({ ...editingTax, description: e.target.value })}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 outline-none text-xs h-16 resize-none"
+                          />
+                        </div>
+                      ) : (
+                        <div className="max-w-md">
+                          <div className="font-bold text-lg text-gray-900 group-hover:text-black transition-colors">{tax.title}</div>
+                          <p className="text-gray-400 text-xs mt-1 line-clamp-1">{tax.description || "No description provided."}</p>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-8 py-5">
+                      {editingId === tax._id ? (
+                        <input
+                          type="number"
+                          value={editingTax.number}
+                          onChange={(e) => setEditingTax({ ...editingTax, number: e.target.value })}
+                          className="w-24 border-2 border-black rounded-lg px-3 py-1.5 outline-none font-bold"
+                        />
+                      ) : (
+                        <div className="flex flex-col">
+                          <span className="text-2xl font-black text-black">
+                            {tax.type === "percent" ? `${tax.number}%` : `$${tax.number}`}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-8 py-5">
+                      {editingId === tax._id ? (
+                        <select
+                          value={editingTax.type}
+                          onChange={(e) => setEditingTax({ ...editingTax, type: e.target.value })}
+                          className="border-2 border-black rounded-lg px-2 py-1.5 outline-none font-bold text-xs"
+                        >
+                          <option value="number">Fixed</option>
+                          <option value="percent">Percent</option>
+                        </select>
+                      ) : (
+                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                          tax.type === 'percent' 
+                            ? 'bg-indigo-50 text-indigo-600 border-indigo-100' 
+                            : 'bg-green-50 text-green-600 border-green-100'
+                        }`}>
+                          {tax.type === 'percent' ? 'Percentage' : 'Fixed Rate'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                      <div className="flex justify-end gap-3">
                         {editingId === tax._id ? (
-                          <div className="space-y-4">
-                            <input type="text" value={editingTax.title} onChange={(e) => setEditingTax({ ...editingTax, title: e.target.value })} className="w-full border-2 border-black p-2 rounded-xl focus:outline-none font-bold" />
-                            <textarea value={editingTax.description} onChange={(e) => setEditingTax({ ...editingTax, description: e.target.value })} className="w-full border-2 border-black p-2 rounded-xl focus:outline-none text-sm" />
-                            <div className="flex gap-2">
-                              <select value={editingTax.type} onChange={(e) => setEditingTax({ ...editingTax, type: e.target.value })} className="flex-1 border-2 border-black p-2 rounded-xl">
-                                <option value="number">Amount</option>
-                                <option value="percent">Percentage</option>
-                              </select>
-                              <input type="number" value={editingTax.number} onChange={(e) => setEditingTax({ ...editingTax, number: e.target.value })} className="flex-1 border-2 border-black p-2 rounded-xl" />
-                            </div>
-                            <div className="flex gap-2">
-                              <button onClick={() => saveEdit(tax._id)} className="flex-1 py-2 bg-black text-white rounded-xl font-bold">Save</button>
-                              <button onClick={() => setEditingId(null)} className="flex-1 py-2 bg-gray-100 rounded-xl">Cancel</button>
-                            </div>
-                          </div>
+                          <>
+                            <button onClick={() => saveEdit(tax._id)} className="p-2.5 text-green-600 hover:bg-green-50 rounded-xl transition-all">
+                              <Save size={18} />
+                            </button>
+                            <button onClick={() => setEditingId(null)} className="p-2.5 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
+                              <X size={18} />
+                            </button>
+                          </>
                         ) : (
                           <>
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${tax.type === 'percent' ? 'bg-indigo-50 text-indigo-600' : 'bg-green-50 text-green-600'}`}>
-                                  {tax.type === 'percent' ? <Percent size={24} /> : <Hash size={24} />}
-                                </div>
-                                <h4 className="text-xl font-bold text-gray-900 truncate">{tax.title}</h4>
-                              </div>
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => startEditing(tax)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors"><Edit3 size={18} /></button>
-                                <button onClick={() => handleDelete(tax._id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18} /></button>
-                              </div>
-                            </div>
-                            <p className="text-gray-500 text-sm mb-6 line-clamp-2 h-10">{tax.description || "No description provided."}</p>
-                            <div className="mt-auto flex items-end justify-between">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{tax.type} rate</span>
-                              <span className="text-3xl font-black text-black">
-                                {tax.type === "percent" ? `${tax.number}%` : `$${tax.number}`}
-                              </span>
-                            </div>
+                            <button onClick={() => startEditing(tax)} className="p-2.5 text-gray-300 hover:text-black border border-transparent hover:border-gray-100 hover:bg-white rounded-xl transition-all shadow-sm">
+                              <Edit3 size={18} />
+                            </button>
+                            <button onClick={() => handleDelete(tax._id)} className="p-2.5 text-gray-300 hover:text-red-600 border border-transparent hover:border-red-50 hover:bg-red-50/30 rounded-xl transition-all shadow-sm">
+                              <Trash2 size={18} />
+                            </button>
                           </>
                         )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="mt-auto p-6 bg-gray-50/50 border-t border-gray-50 flex justify-end">
-                <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Active Rules: <span className="text-black ml-1">{filteredTaxes.length}</span></div>
-              </div>
-            </div>
-          </section>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </main>
+        <div className="px-8 py-4 bg-[#fafafa] border-t border-gray-50 text-right">
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+            Active Rules: <span className="text-black ml-1">{filteredTaxes.length}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* MODAL FOR ADDING TAX RULE */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsModalOpen(false)}></div>
+          <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] p-8 md:p-12 shadow-2xl animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-8 right-8 p-2 text-gray-400 hover:text-black transition-colors"
+            >
+              <X size={28} />
+            </button>
+
+            <div className="mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Create Tax Rule</h2>
+              <p className="text-gray-500 mt-2">Define how taxes are applied to your transactions.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Rule Title</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="e.g. Standard VAT"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-[#f9f9f9] border border-transparent p-5 pl-14 rounded-2xl focus:bg-white focus:border-black outline-none transition-all text-lg"
+                    required
+                  />
+                  <FileText className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={24} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Description</label>
+                <textarea
+                  placeholder="Notes about this tax rule..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-[#f9f9f9] border border-transparent p-5 rounded-2xl focus:bg-white focus:border-black outline-none transition-all h-24 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Type</label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="w-full bg-[#f9f9f9] border border-transparent p-5 rounded-2xl focus:bg-white focus:border-black outline-none transition-all appearance-none cursor-pointer font-bold"
+                  >
+                    <option value="number">Fixed Amount</option>
+                    <option value="percent">Percentage</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Rate Value</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={number}
+                      onChange={(e) => setNumber(e.target.value)}
+                      className="w-full bg-[#f9f9f9] border border-transparent p-5 pl-14 rounded-2xl focus:bg-white focus:border-black outline-none transition-all text-lg font-bold"
+                      required
+                    />
+                    <Hash className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={24} />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-5 rounded-2xl font-bold text-lg transition-all ${loading
+                  ? "bg-gray-100 text-gray-400"
+                  : "bg-black text-white hover:bg-gray-800 shadow-xl shadow-black/10 active:scale-95"
+                  }`}
+              >
+                {loading ? "Processing..." : "Add Tax Rule"}
+              </button>
+            </form>
+
+            {message && (
+              <div className={`mt-8 p-5 rounded-2xl flex items-center gap-4 text-sm font-bold animate-in fade-in slide-in-from-bottom-2 ${message.toLowerCase().includes("success")
+                ? "bg-green-50 text-green-700 border border-green-100"
+                : "bg-red-50 text-red-700 border border-red-100"
+                }`}>
+                {message.toLowerCase().includes("success") ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                {message}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
