@@ -23,6 +23,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
+
+
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -140,21 +143,27 @@ function Sidebar({
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
-  if (isMobile) {
-    return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-        <SheetContent
-          data-sidebar="sidebar"
-          data-mobile="true"
-          className="w-[var(--sidebar-width-mobile)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-          style={{ "--sidebar-width": "var(--sidebar-width-mobile)" }}
-          side={side}
-        >
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
-    )
-  }
+ if (isMobile) {
+  return (
+    <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+      <SheetContent
+        data-sidebar="sidebar"
+        data-mobile="true"
+        className="w-[var(--sidebar-width-mobile)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+        style={{ "--sidebar-width": "var(--sidebar-width-mobile)" }}
+        side={side}
+      >
+        {/* Fix: Added VisuallyHidden Title for Accessibility */}
+        <VisuallyHidden.Root>
+          <SheetTitle>Sidebar Menu</SheetTitle>
+          <SheetDescription>Mobile navigation sidebar</SheetDescription>
+        </VisuallyHidden.Root>
+
+        <div className="flex h-full w-full flex-col">{children}</div>
+      </SheetContent>
+    </Sheet>
+  )
+}
 
   return (
     <div
