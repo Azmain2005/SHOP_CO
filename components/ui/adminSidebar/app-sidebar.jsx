@@ -36,7 +36,7 @@ const items = [
     icon: DollarSign,
     sub_items: [
       { title: "Website Orders", url: "/admin/orders/websiteOrders" },
-      { title: "POS Orders", url: "/admin/pos" },
+      // { title: "POS Orders", url: "/admin/pos" },
     ],
   },
   { title: "Users", url: "/admin/user", icon: Users },
