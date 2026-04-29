@@ -136,7 +136,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/login"><FiUser className="text-xl text-stone-800" /></Link>
+            {/* <Link href="/login"><FiUser className="text-xl text-stone-800" /></Link> */}
             <Link href="/cart" className="relative p-2">
               <FiShoppingCart className="text-xl text-stone-800" />
               <span className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
