@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 /**
  * CollectionBanner — Full-width editorial split banner.
@@ -26,9 +27,8 @@ export default function CollectionBanner({
   return (
     <section className={`w-full ${bgColor} overflow-hidden`}>
       <div
-        className={`max-w-[1440px] mx-auto flex flex-col ${
-          isImageRight ? "md:flex-row" : "md:flex-row-reverse"
-        } items-stretch min-h-[400px] md:min-h-[520px]`}
+        className={`max-w-[1440px] mx-auto flex flex-col ${isImageRight ? "md:flex-row" : "md:flex-row-reverse"
+          } items-stretch min-h-[400px] md:min-h-[520px]`}
       >
         {/* Text Side */}
         <motion.div
@@ -66,11 +66,13 @@ export default function CollectionBanner({
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
         >
-          <img
+          <Image
             src={imageUrl}
             alt={title}
-            className="w-full h-full object-cover object-top"
-            style={{ minHeight: "320px", display: "block" }}
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority={title.includes("ABAYA")} // Optional: Prioritize the first banner
           />
         </motion.div>
       </div>

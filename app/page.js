@@ -10,14 +10,12 @@ import CollectionBanner from "./components/CollectionBanner.js";
 import FeaturedProducts from "./components/FeaturedProducts.js";
 
 // Modest women's fashion — editorial collection images (verified Unsplash IDs)
+// Change this:
 const COLLECTION_IMAGES = {
-  abaya:
-    "https://i.ibb.co.com/mC7hXR4C/abdul-raheem-kannath-CWD8-UDt3y-PI-unsplash.jpg",
-  kaftan:
-    "https://i.ibb.co.com/ymdYSwVq/image.png",
-  borka:
-    "https://i.ibb.co.com/NdtRb9GD/modern-stylish-muslim-woman-hijab-city-street.jpg",
-  hijab: "https://i.ibb.co.com/27Mm3Y7Y/muhammad-faiz-zulkeflee-Kr-R7x-En4-HV8-unsplash.jpg",
+  abaya: "/abaya.png",  // Clean path
+  kaftan: "/kaftan.png",
+  borka: "/borka.png",
+  hijab: "/hijab.png",
   kids: "https://images.unsplash.com/photo-1542156822-6924d1a71ace?w=900&q=85&fit=crop",
 };
 

@@ -7,33 +7,32 @@ const CATEGORIES = [
   {
     id: "abaya",
     label: "Abaya",
-    img: "https://i.ibb.co.com/mC7hXR4C/abdul-raheem-kannath-CWD8-UDt3y-PI-unsplash.jpg",
+    img: "/abaya.png", // Removed ../public
     href: "/product?category=abaya",
     description: "Modern Silhouettes"
   },
   {
     id: "kaftan",
     label: "Kaftan",
-    img: "https://i.ibb.co.com/ymdYSwVq/image.png",
+    img: "/kaftan.png", // Removed ../public
     href: "/product?category=kaftan",
     description: "Flowing Elegance"
   },
   {
     id: "borka",
     label: "Borka",
-    img: "https://i.ibb.co.com/NdtRb9GD/modern-stylish-muslim-woman-hijab-city-street.jpg",
+    img: "/borka.png", // Removed ../public
     href: "/product?category=borka",
     description: "Classic Modesty"
   },
   {
     id: "hijab",
     label: "Hijab",
-    img: "https://i.ibb.co.com/27Mm3Y7Y/muhammad-faiz-zulkeflee-Kr-R7x-En4-HV8-unsplash.jpg",
+    img: "/hijab.png", // Removed ../public
     href: "/product?category=hijab",
     description: "Signature Silk"
   },
 ];
-
 export default function TrendingCategories() {
   return (
     <section className="py-20 px-6 bg-white max-w-[1440px] mx-auto">
@@ -70,11 +69,12 @@ export default function TrendingCategories() {
             <Link href={cat.href} className="group relative block overflow-hidden bg-stone-100">
               {/* Image Container with 4:5 Aspect Ratio */}
               <div className="relative aspect-[4/5] overflow-hidden">
-                <img
-                  src={cat.img}
-                  alt={cat.label}
-                  className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
-                />
+                <Image
+  src={cat.img}
+  alt={cat.label}
+  fill // Uses the parent relative container (your aspect-[4/5] div)
+  className="object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+/>
                 
                 {/* Minimal Overlay */}
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-500" />

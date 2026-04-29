@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Image from "next/image";
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 // ================= CART ITEM =================
 const CartItem = ({ item, onDelete, onUpdateQty }) => {
@@ -207,7 +208,12 @@ export default function CartPage() {
     if (e) e.preventDefault();
     // 1. Basic validation check
     if (!formData.name || !formData.phone || !formData.address || !formData.city) {
-      alert("Please fill in all required shipping details.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Missing Information',
+        text: 'Please fill in all required shipping details.',
+        confirmButtonColor: '#3085d6',
+      });
       return;
     }
     if (cartItems.length === 0) {
@@ -229,7 +235,12 @@ export default function CartPage() {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/order`, orderPayload);
 
       if (response.status === 201 || response.status === 200) {
-        alert("Order placed successfully!");
+        Swal.fire({
+          icon: 'success',
+          title: 'Order Placed!',
+          text: 'Your order has been recorded successfully.',
+          timer: 2000 // Automatically closes after 2 seconds
+        });
 
         //update the cart to pending
         updateCartToPending(formData.cartId);

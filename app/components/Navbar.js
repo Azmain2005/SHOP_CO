@@ -139,7 +139,6 @@ export default function Navbar() {
             {/* <Link href="/login"><FiUser className="text-xl text-stone-800" /></Link> */}
             <Link href="/cart" className="relative p-2">
               <FiShoppingCart className="text-xl text-stone-800" />
-              <span className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
             </Link>
           </div>
         </div>
@@ -147,50 +146,77 @@ export default function Navbar() {
 
       {/* Mobile Drawer (Condensed sub-category logic) */}
       <AnimatePresence>
-        {isMobileOpen && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileOpen(false)} className="fixed inset-0 bg-black/40 z-[110] backdrop-blur-[2px] md:hidden" />
-            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} className="fixed top-0 left-0 bottom-0 w-[85%] bg-white z-[120] p-8 overflow-y-auto">
-              <div className="flex justify-between items-center mb-10">
-                <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Menu</span>
-                <button onClick={() => setIsMobileOpen(false)} className="text-2xl"><FiX /></button>
-              </div>
+  {isMobileOpen && (
+    <>
+      {/* Overlay */}
+      <motion.div 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        exit={{ opacity: 0 }} 
+        onClick={() => setIsMobileOpen(false)} 
+        className="fixed inset-0 bg-black/40 z-[110] backdrop-blur-[2px] md:hidden" 
+      />
+      
+      {/* Drawer Content */}
+      <motion.div 
+        initial={{ x: "-100%" }} 
+        animate={{ x: 0 }} 
+        exit={{ x: "-100%" }}
+        transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }} // Smoother than spring for sidebars
+        className="fixed top-0 left-0 h-full w-[85%] max-w-[400px] bg-white z-[120] p-8 overflow-y-auto shadow-2xl"
+      >
+        <div className="flex justify-between items-center mb-10">
+          <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Menu</span>
+          <button onClick={() => setIsMobileOpen(false)} className="text-2xl p-2 -mr-2"><FiX /></button>
+        </div>
 
-              <div className="flex flex-col gap-8">
-                {NAV_LINKS.map((link) => (
-                  <div key={link.label}>
-                    <Link href={link.href} onClick={() => !link.hasDropdown && setIsMobileOpen(false)} className="text-xl font-serif text-stone-800 uppercase tracking-wider">{link.label}</Link>
-                    {link.hasDropdown && (
-                      <div className="mt-6 flex flex-col gap-6">
-                        {categories.map(parent => (
-                          <div key={parent._id} className="space-y-3">
+        <div className="flex flex-col gap-8">
+          {NAV_LINKS.map((link) => (
+            <div key={link.label}>
+              <Link 
+                href={link.href} 
+                onClick={() => !link.hasDropdown && setIsMobileOpen(false)} 
+                className="text-xl font-serif text-stone-800 uppercase tracking-wider block"
+              >
+                {link.label}
+              </Link>
+              
+              {link.hasDropdown && (
+                <div className="mt-6 flex flex-col gap-6">
+                  {categories.map(parent => (
+                    <div key={parent._id} className="space-y-3">
+                      <Link 
+                        href={`/product?category=${parent._id}`}
+                        onClick={() => setIsMobileOpen(false)}
+                        className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 block border-b border-stone-100 pb-1"
+                      >
+                        {parent.title}
+                      </Link>
+                      {parent.subCategories.length > 0 && (
+                        <div className="grid grid-cols-2 gap-3 ml-2">
+                          {parent.subCategories.map(sub => (
                             <Link 
-                              href={`/product?category=${parent._id}`}
-                              onClick={() => setIsMobileOpen(false)}
-                              className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 block border-b border-stone-50 pb-1"
+                              key={sub._id} 
+                              href={`/product?category=${sub._id}`} 
+                              onClick={() => setIsMobileOpen(false)} 
+                              className="text-[10px] uppercase tracking-widest text-stone-500 py-1"
                             >
-                              {parent.title}
+                              {sub.title}
                             </Link>
-                            {parent.subCategories.length > 0 && (
-                              <div className="grid grid-cols-2 gap-3 ml-2">
-                                {parent.subCategories.map(sub => (
-                                  <Link key={sub._id} href={`/product?category=${sub._id}`} onClick={() => setIsMobileOpen(false)} className="text-[10px] uppercase tracking-widest text-stone-500">
-                                    {sub.title}
-                                  </Link>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
     </>
   );
 }
