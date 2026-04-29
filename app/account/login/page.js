@@ -7,6 +7,7 @@ import { Lock, Mail, ArrowRight, Fingerprint, Loader2 } from "lucide-react";
 import toast, { Toaster } from 'react-hot-toast';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie'; 
+import Swal from 'sweetalert2';
 
 
 export default function LuxuryLogin() {
@@ -36,12 +37,23 @@ export default function LuxuryLogin() {
         Cookies.set('auth_token', data.access_token, { expires: 1, secure: true, sameSite: 'strict' });
         localStorage.setItem('auth_token', data.access_token);
         setIsAuthenticated(true);
-        toast.success("Identity Verified");
+        Swal.fire({
+          title: 'Success!',
+          text: 'Identity Verified',
+          icon: 'success',
+          timer: 2000
+        });
         setTimeout(() => {
           router.push('/admin/dashboard');
         }, 1500);
       } else {
-        alert(data.error || "Identity Verification Failed");
+        // alert(data.error || "Identity Verification Failed");
+        Swal.fire({
+        title: 'Error!',
+        text: 'Identity Verification Failed.',
+        icon: 'error',
+        confirmButtonText: 'Cool'
+      });
       }
     } catch (err) {
       alert("Too many attempt happen, please wait for 2 minutes.");

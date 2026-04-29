@@ -204,14 +204,6 @@ export default function EditProductPage() {
     }
   };
 
-  const navItems = [
-    { name: "Categories", href: "/admin/categorie", icon: LayoutGrid },
-    { name: "Brands", href: "/admin/brand", icon: Globe },
-    { name: "Tax Rules", href: "/admin/taxrule", icon: Percent },
-    { name: "Collections", href: "/admin/collection", icon: Layers },
-    { name: "Attributes", href: "/admin/attribute", icon: Tag },
-    { name: "All Products", href: "/admin/allproduct", icon: Package },
-  ];
 
   return (
     <div className="min-h-screen w-full bg-[#f8f9fa] text-gray-900 font-sans pb-20">
@@ -228,18 +220,7 @@ export default function EditProductPage() {
             </div>
           </div>
 
-          <nav className="flex flex-wrap items-center gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive ? "bg-black text-white" : "text-gray-500 hover:text-black"}`}>
-                  <Icon size={16} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
+
         </div>
       </header>
 
@@ -265,14 +246,27 @@ export default function EditProductPage() {
                   <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Enter a descriptive title" className="w-full bg-gray-50 border-none p-4 rounded-2xl focus:ring-4 focus:ring-indigo-500/5 focus:bg-white transition-all text-lg font-bold" required />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6"> {/* Removed md:grid-cols-2 */}
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-500 ml-1">Short Overview</label>
-                    <textarea name="overview" value={form.overview} onChange={handleChange} className="w-full bg-gray-50 border-none p-4 rounded-2xl h-32 resize-none" placeholder="Catchy summary..." />
+                    <textarea
+                      name="overview"
+                      value={form.overview}
+                      onChange={handleChange}
+                      className="w-full bg-gray-50 border-none p-4 rounded-2xl h-32 resize-none focus:ring-2 focus:ring-stone-200 transition-all"
+                      placeholder="Catchy summary..."
+                    />
                   </div>
+
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-500 ml-1">Full Description</label>
-                    <textarea name="description" value={form.description} onChange={handleChange} className="w-full bg-gray-50 border-none p-4 rounded-2xl h-32 resize-none" placeholder="Technical details..." />
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      className="w-full bg-gray-50 border-none p-4 rounded-2xl h-72 resize-none focus:ring-2 focus:ring-stone-200 transition-all"
+                      placeholder="Technical details..."
+                    />
                   </div>
                 </div>
               </div>
